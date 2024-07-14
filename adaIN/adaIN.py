@@ -6,7 +6,7 @@ module_path = os.path.abspath(current_dir)
 
 if module_path not in sys.path:
     sys.path.append(module_path)
-    
+
 import torch
 import torchvision
 import torch.nn as nn
@@ -19,7 +19,7 @@ from glob import glob
 
 import random
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = 'cpu'
 
 
 
