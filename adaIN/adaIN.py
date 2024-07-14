@@ -1,3 +1,12 @@
+import os
+import sys
+
+current_dir = os.path.dirname(__file__)
+module_path = os.path.abspath(current_dir)
+
+if module_path not in sys.path:
+    sys.path.append(module_path)
+    
 import torch
 import torchvision
 import torch.nn as nn
@@ -7,12 +16,12 @@ import numpy as np
 import torchvision.transforms.v2 as transforms
 from PIL import Image, ImageFile
 from glob import glob
-import os
+
 import random
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-current_dir = os.path.dirname(__file__)
+
 
 encoder_rel_path = 'models/vgg_normalised.pth'
 decoder_rel_path = 'models/decoder.pth'
