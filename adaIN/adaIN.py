@@ -41,6 +41,7 @@ class NSTTransform(transforms.Transform):
 
         style_image = self.get_random_image(self.style_dir)
         transform = transforms.ToTensor()
+        to_pil = transforms.ToPILImage()
         x = transform(x).unsqueeze(0)
 
         upsample = nn.Upsample(size=(224, 224), mode='bilinear')
@@ -54,7 +55,7 @@ class NSTTransform(transforms.Transform):
         
         stl_img = stl_img.cpu()
 
-        stl_img = downsample(stl_img)
+        stl_img = to_pil(downsample(stl_img).squeeze(0))
         
         return stl_img
 
