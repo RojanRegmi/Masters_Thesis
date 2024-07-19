@@ -1,3 +1,9 @@
+import torch.multiprocessing as mp
+
+mp.set_start_method('spawn', force=True)
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 import os
 import sys
 
@@ -19,11 +25,7 @@ from PIL import Image, ImageFile
 from glob import glob
 
 import random
-import torch.multiprocessing as mp
 
-mp.set_start_method('spawn', force=True)
-
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 
