@@ -53,9 +53,9 @@ class NSTTransform(transforms.Transform):
         with torch.no_grad():
             stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
         
-        stl_img = stl_img.cpu().squeeze(0)
+        stl_img = stl_img.cpu()
 
-        # stl_img = to_pil(downsample(stl_img).squeeze(0))
+        stl_img = to_pil(downsample(stl_img).squeeze(0))
         
         return stl_img
 
