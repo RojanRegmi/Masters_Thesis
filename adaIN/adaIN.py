@@ -7,6 +7,7 @@ module_path = os.path.abspath(current_dir)
 if module_path not in sys.path:
     sys.path.append(module_path)
 
+
 import torch
 import torchvision
 import torch.nn as nn
@@ -18,6 +19,9 @@ from PIL import Image, ImageFile
 from glob import glob
 
 import random
+import torch.multiprocessing as mp
+
+mp.set_start_method('spawn', force=True)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
