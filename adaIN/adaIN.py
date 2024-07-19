@@ -43,7 +43,7 @@ class NSTTransform(transforms.Transform):
         transform = transforms.ToTensor()
         to_pil = transforms.ToPILImage()
         x = transform(x).unsqueeze(0)
-
+        
         upsample = nn.Upsample(size=(224, 224), mode='bilinear')
         downsample = nn.Upsample(size=(32, 32), mode='bilinear')
 
@@ -72,7 +72,7 @@ class NSTTransform(transforms.Transform):
         stl_img = Image.open(random_image_path)
         style_tensor = tensor_transform(stl_img).unsqueeze(0)
 
-        style_tensor = torchvision.io.read_image(random_image_path).unsqueeze(0)
+        #style_tensor = torchvision.io.read_image(random_image_path).unsqueeze(0)
 
         return style_tensor
 
