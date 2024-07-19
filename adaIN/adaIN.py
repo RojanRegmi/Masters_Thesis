@@ -55,7 +55,7 @@ class NSTTransform(transforms.Transform):
         
         stl_img = stl_img.cpu()
 
-        stl_img = to_pil(downsample(stl_img).squeeze(0))
+        stl_img = downsample(stl_img).squeeze(0)
         
         return stl_img
 
@@ -72,7 +72,7 @@ class NSTTransform(transforms.Transform):
         stl_img = Image.open(random_image_path)
         style_tensor = tensor_transform(stl_img).unsqueeze(0)
 
-        #style_tensor = torchvision.io.read_image(random_image_path).unsqueeze(0)
+                    #style_tensor = torchvision.io.read_image(random_image_path).unsqueeze(0) # Another way to transform to tensor but gives error.
 
         return style_tensor
 
