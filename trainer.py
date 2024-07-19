@@ -62,7 +62,7 @@ class CIFAR10(Dataset):
         return img, target
 
 
-def trainer(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
+def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
@@ -116,11 +116,11 @@ def trainer(epochs: int, net, trainloader, testloader, device, save_path='./cifa
     torch.save(net.state_dict(), save_path)
     print('Finished Training')
 
-if __name__ == '___main__' :
+if __name__ == '__main__' :
 
     mp.set_start_method('spawn', force=True)
 
-    device = torch.device('cuda: 0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized')
 
@@ -152,7 +152,7 @@ if __name__ == '___main__' :
     net = WideResNet_28_4(num_classes=10)
     net.to(device)
 
-    trainer(epochs=100, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
+    trainer_fn(epochs=100, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
 
 
     
