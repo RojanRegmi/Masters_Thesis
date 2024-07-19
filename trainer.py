@@ -12,6 +12,8 @@ import torch.nn as nn
 import torch.nn.init as init
 from PIL import Image
 
+import numpy as np
+
 import pickle
 from torch.utils.data import Dataset
 import os
