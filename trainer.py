@@ -117,7 +117,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
                 images, labels = images.to(device), labels.to(device)
                 outputs = net(images)
                 _, predicted = torch.max(outputs.data, 1)
-                total *= labels.size(0)
+                total += labels.size(0)
                 correct += (predicted==labels).sum().item()
         
         print(f'Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')

@@ -1,10 +1,10 @@
 import torch
+import torchvision
 import torch.multiprocessing as mp
 import random
 import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR
 from torch.optim.lr_scheduler import CosineAnnealingLR
-import torchvision
 
 import torch.optim as optim
 import torch.nn.functional as F
@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch.nn.init as init
 from PIL import Image
-import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -65,16 +64,6 @@ class CIFAR10(Dataset):
         target = self.targets[index]
         
         return img, target
-    
-def imshow(img):
-
-    npimg = img.numpy()
-    plt.figure(figsize=(20, 25))
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
-
-    
-
 
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
@@ -101,11 +90,48 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
         for i, (inputs, labels) in enumerate(trainloader):
 
-            logging.info(f'Start Dataloader batch {i}')
+            # zero the parameter gradients
+            optimizer.zero_grad()
 
-            img_grid = torchvision.utils.make_grid(inputs)
-            imshow(img_grid)
-            
+            # get the inputs
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+            # calculating training accuracy
+            _, predicted = torch.max(outputs.data, 1)
+            total_train += labels.size(0)
+            correct_train += (predicted == labels).sum().item()
+
+            if i % 10 == 0:
+                logger.info(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
+
+        torch.cuda.empty_cache()
+        net = net.cpu()
+
+        with torch.no_grad():
+            net.eval()
+            for images, labels in testloader:
+                # images, labels = images.to(device), labels.to(device)
+                outputs = net(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted==labels).sum().item()
+        
+        print(f'Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
+        logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
+
+        net = net.to(device)
+
+        scheduler.step()
+    
+    torch.save(net.state_dict(), save_path)
+    print('Finished Training')
 
 if __name__ == '__main__' :
 
@@ -113,7 +139,7 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized')
+    nst_transfer = NSTTransform(style_dir = 'style/')
 
     transform_train = transforms.Compose([
         nst_transfer,
@@ -131,12 +157,11 @@ if __name__ == '__main__' :
 
     batch_size = 256
 
-    cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
-    trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
+    trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4)
+                                            shuffle=True, pin_memory=True, num_workers=2)
 
-    testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_test)
+    testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=0)
     
@@ -144,9 +169,6 @@ if __name__ == '__main__' :
     net.to(device)
 
     trainer_fn(epochs=100, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
-
-
-    
 
             
 
