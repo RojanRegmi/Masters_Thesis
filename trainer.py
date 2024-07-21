@@ -17,6 +17,7 @@ import numpy as np
 import pickle
 from torch.utils.data import Dataset
 import os
+import logging
 
 from adaIN.adaIN import NSTTransform
 from resnet_wide import WideResNet_28_4
@@ -66,6 +67,9 @@ class CIFAR10(Dataset):
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
 
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
 
@@ -102,6 +106,9 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
             total_train += labels.size(0)
             correct_train += (predicted == labels).sum().item()
 
+            if i % 10 == 0:
+                logger.info(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
+
         with torch.no_grad():
             net.eval()
             for images, labels in testloader:
@@ -112,6 +119,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
                 correct += (predicted==labels).sum().item()
         
         print(f'Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
+        logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
         scheduler.step()
     
@@ -140,7 +148,7 @@ if __name__ == '__main__' :
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    batch_size = 32
+    batch_size = 256
 
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
