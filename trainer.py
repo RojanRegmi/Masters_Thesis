@@ -89,6 +89,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
         for i, (inputs, labels) in enumerate(trainloader):
 
+            logging.info(f'Start Training batch {i}')
             # zero the parameter gradients
             optimizer.zero_grad()
 
