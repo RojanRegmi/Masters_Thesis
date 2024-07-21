@@ -67,7 +67,8 @@ class CIFAR10(Dataset):
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    log_file = 'training.log'
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler(log_file, mode='w'), logging.StreamHandler()])
     logger = logging.getLogger()
 
     criterion = nn.CrossEntropyLoss()
