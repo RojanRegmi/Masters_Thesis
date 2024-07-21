@@ -20,7 +20,7 @@ from glob import glob
 
 import random
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 encoder_rel_path = 'models/vgg_normalised.pth'
 decoder_rel_path = 'models/decoder.pth'

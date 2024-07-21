@@ -140,16 +140,16 @@ if __name__ == '__main__' :
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    batch_size = 256
+    batch_size = 32
 
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, num_workers=2)
+                                            shuffle=True, pin_memory=True, num_workers=4)
 
-    testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_train)
+    testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
-                                            shuffle=True, num_workers=0)
+                                            shuffle=True, pin_memory=True, num_workers=0)
     
     net = WideResNet_28_4(num_classes=10)
     net.to(device)
