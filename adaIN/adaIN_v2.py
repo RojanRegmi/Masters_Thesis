@@ -40,7 +40,7 @@ class NSTTransform(transforms.Transform):
         x = self.upsample(x).to(device)
 
         idx = torch.randperm(self.num_styles, device=device)[0]
-        style_image = self.style_images[idx]
+        style_image = self.style_images[idx].unsqueeze(0)
         
         stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
         
