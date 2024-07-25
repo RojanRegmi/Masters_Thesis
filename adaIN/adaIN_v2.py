@@ -9,7 +9,7 @@ if module_path not in sys.path:
 
 import torch
 import torch.nn as nn
-import torchvision.transforms as transforms
+import torchvision.transforms.v2 as transforms
 import os
 import random
 from PIL import Image
