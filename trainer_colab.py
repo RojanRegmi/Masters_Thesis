@@ -20,7 +20,7 @@ from torch.utils.data import Dataset
 import os
 import logging
 
-from adaIN.adaIN import NSTTransform
+from adaIN.adaIN_v2 import NSTTransform
 from resnet_wide import WideResNet_28_4
 
 class CIFAR10(Dataset):
@@ -112,12 +112,12 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
                 logger.info(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
 
         torch.cuda.empty_cache()
-        net = net.cpu()
+        #net = net.cpu()
 
         with torch.no_grad():
             net.eval()
             for images, labels in testloader:
-                # images, labels = images.to(device), labels.to(device)
+                images, labels = images.to(device), labels.to(device)
                 outputs = net(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
@@ -126,7 +126,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
         print(f'Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
-        net = net.to(device)
+        #net = net.to(device)
 
         scheduler.step()
     

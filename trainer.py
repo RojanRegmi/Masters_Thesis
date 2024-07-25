@@ -19,7 +19,7 @@ from torch.utils.data import Dataset
 import os
 import logging
 
-from adaIN.adaIN import NSTTransform
+from adaIN.adaIN_v2 import NSTTransform
 from resnet_wide import WideResNet_28_4
 
 class CIFAR10(Dataset):
