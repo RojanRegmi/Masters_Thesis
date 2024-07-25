@@ -192,7 +192,7 @@ if __name__ == '__main__' :
     net = WideResNet_28_4(num_classes=10)
     net.to(device)
 
-    trainer_fn(epochs=100, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
+    trainer_fn(epochs=50, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
 
 
     
