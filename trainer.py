@@ -20,6 +20,7 @@ import os
 import logging
 
 from adaIN.adaIN_v2 import NSTTransform
+import adaIN.net as net
 from resnet_wide import WideResNet_28_4
 
 import sys
