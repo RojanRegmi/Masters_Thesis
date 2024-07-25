@@ -178,7 +178,7 @@ if __name__ == '__main__' :
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    batch_size = 256
+    batch_size = 512
 
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
