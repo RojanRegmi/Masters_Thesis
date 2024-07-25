@@ -23,10 +23,11 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_dir, alpha=1.0):
+    def __init__(self, style_dir, vgg, decoder, alpha=1.0):
         super().__init__()
         self.style_dir = style_dir
-        self.vgg, self.decoder = self.load_models()
+        self.vgg = vgg
+        self.decoder = decoder
         self.alpha = alpha
         self.upsample = nn.Upsample(size=(224, 224), mode='bilinear', align_corners=False)
         self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=False)
@@ -58,17 +59,6 @@ class NSTTransform(transforms.Transform):
             tensor = self.upsample(tensor).to(device)
             style_images.append(tensor)
         return torch.cat(style_images, dim=0).to(device)
-
-    def load_models(self):
-        vgg = net.vgg
-        decoder = net.decoder
-        vgg.load_state_dict(torch.load(encoder_path))
-        vgg = nn.Sequential(*list(vgg.children())[:31])
-        decoder.load_state_dict(torch.load(decoder_path))
-        
-        vgg.to(device).eval()
-        decoder.to(device).eval()
-        return vgg, decoder
 
     @torch.no_grad()
     def style_transfer(self, vgg, decoder, content, style, alpha=1.0):

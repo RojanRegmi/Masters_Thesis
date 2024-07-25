@@ -22,6 +22,20 @@ import logging
 from adaIN.adaIN_v2 import NSTTransform
 from resnet_wide import WideResNet_28_4
 
+import sys
+
+current_dir = os.path.dirname(__file__)
+module_path = os.path.abspath(current_dir)
+
+if module_path not in sys.path:
+    sys.path.append(module_path)
+
+encoder_rel_path = 'models/vgg_normalised.pth'
+decoder_rel_path = 'models/decoder.pth'
+encoder_path = os.path.join(current_dir, encoder_rel_path)
+decoder_path = os.path.join(current_dir, decoder_rel_path)
+
+
 class CIFAR10(Dataset):
     def __init__(self, data_dir, train=True, transform=None):
         self.data_dir = data_dir
@@ -63,6 +77,17 @@ class CIFAR10(Dataset):
         target = self.targets[index]
         
         return img, target
+
+def load_models():
+    vgg = net.vgg
+    decoder = net.decoder
+    vgg.load_state_dict(torch.load(encoder_path))
+    vgg = nn.Sequential(*list(vgg.children())[:31])
+    decoder.load_state_dict(torch.load(decoder_path))
+
+    vgg.to(device).eval()
+    decoder.to(device).eval()
+    return vgg, decoder
 
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
@@ -134,7 +159,9 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized')
+    vgg, decoder = load_models()
+
+    nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder)
 
     transform_train = transforms.Compose([
         nst_transfer,
