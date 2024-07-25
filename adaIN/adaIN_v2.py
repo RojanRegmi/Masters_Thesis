@@ -53,7 +53,7 @@ class NSTTransform(transforms.Transform):
         subset_imgs = total_images[0:1000]
         for file in subset_imgs:
             img_path = os.path.join(self.style_dir, file)
-            img = Image.open(img_path).convert('RGB')
+            img = Image.open(img_path)
             tensor = self.to_tensor(img).unsqueeze(0)
             tensor = self.upsample(tensor).to(device)
             style_images.append(tensor)
