@@ -35,12 +35,12 @@ class NSTTransform(transforms.Transform):
         self.style_dir = style_dir
         self.vgg, self.decoder = self.load_models()
         self.alpha = alpha
+        self.upsample = nn.Upsample(size=(224, 224), mode='bilinear')
 
     def __call__(self, x):
 
         style_image = self.get_random_image(self.style_dir)
         transform = transforms.ToTensor()
-        to_pil = transforms.ToPILImage()
         x = transform(x).unsqueeze(0)
         
         upsample = nn.Upsample(size=(224, 224), mode='bilinear')

@@ -23,7 +23,7 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_dir, vgg, decoder, alpha=1.0):
+    def __init__(self, style_dir, vgg, decoder, alpha=1.0, num_style_img=1000):
         super().__init__()
         self.style_dir = style_dir
         self.vgg = vgg
@@ -32,7 +32,7 @@ class NSTTransform(transforms.Transform):
         self.upsample = nn.Upsample(size=(224, 224), mode='bilinear', align_corners=False)
         self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=False)
         self.to_tensor = transforms.ToTensor()
-        self.style_images = self.preload_style_images()
+        self.style_images = self.preload_style_images(num_style_img)
         self.num_styles = len(self.style_images)
 
     @torch.no_grad()
@@ -48,10 +48,10 @@ class NSTTransform(transforms.Transform):
         stl_img = self.downsample(stl_img).squeeze(0).cpu()
         return stl_img
 
-    def preload_style_images(self):
+    def preload_style_images(self, num_style_img):
         style_images = []
         total_images = os.listdir(self.style_dir)
-        subset_imgs = total_images[0:1000]
+        subset_imgs = total_images[0:num_style_img]
         for file in subset_imgs:
             img_path = os.path.join(self.style_dir, file)
             img = Image.open(img_path)

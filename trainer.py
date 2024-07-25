@@ -183,7 +183,7 @@ if __name__ == '__main__' :
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=8)
+                                            shuffle=True, pin_memory=True, num_workers=4)
 
     testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
