@@ -31,8 +31,8 @@ module_path = os.path.abspath(current_dir)
 if module_path not in sys.path:
     sys.path.append(module_path)
 
-encoder_rel_path = 'models/vgg_normalised.pth'
-decoder_rel_path = 'models/decoder.pth'
+encoder_rel_path = 'adaIN/models/vgg_normalised.pth'
+decoder_rel_path = 'adaIN/models/decoder.pth'
 encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
