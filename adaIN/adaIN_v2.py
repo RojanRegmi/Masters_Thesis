@@ -49,7 +49,9 @@ class NSTTransform(transforms.Transform):
 
     def preload_style_images(self):
         style_images = []
-        for file in os.listdir(self.style_dir):
+        total_images = os.listdir(self.style_dir)
+        subset_imgs = total_images[0:1000]
+        for file in subset_imgs:
             img_path = os.path.join(self.style_dir, file)
             img = Image.open(img_path).convert('RGB')
             tensor = self.to_tensor(img).unsqueeze(0)
