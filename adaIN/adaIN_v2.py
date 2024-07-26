@@ -23,7 +23,7 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_dir, vgg, decoder, alpha=1.0, num_style_img=1000):
+    def __init__(self, style_dir, vgg, decoder, alpha=1.0, num_style_img=1000, probability=0.5):
         super().__init__()
         self.style_dir = style_dir
         self.vgg = vgg
@@ -34,19 +34,25 @@ class NSTTransform(transforms.Transform):
         self.to_tensor = transforms.ToTensor()
         self.style_images = self.preload_style_images(num_style_img)
         self.num_styles = len(self.style_images)
+        self.probability = probability
 
     @torch.no_grad()
     def __call__(self, x):
-        x = self.to_tensor(x).unsqueeze(0)
-        x = self.upsample(x).to(device)
+        
+        if torch.rand(1).item() < self.probability:
+            x = self.to_tensor(x).unsqueeze(0)
+            x = self.upsample(x).to(device)
 
-        idx = torch.randperm(self.num_styles, device=device)[0]
-        style_image = self.style_images[idx].unsqueeze(0)
+            idx = torch.randperm(self.num_styles, device=device)[0]
+            style_image = self.style_images[idx].unsqueeze(0)
+            
+            stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
+            
+            stl_img = self.downsample(stl_img).squeeze(0).cpu()
+            return stl_img
         
-        stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
-        
-        stl_img = self.downsample(stl_img).squeeze(0).cpu()
-        return stl_img
+        else:
+            return x
 
     def preload_style_images(self, num_style_img):
         style_images = []
