@@ -40,9 +40,8 @@ class NSTTransform(transforms.Transform):
     def __call__(self, x):
 
         x = self.to_tensor(x).unsqueeze(0)
-        
+
         if torch.rand(1).item() < self.probability:
-            x = self.to_tensor(x).unsqueeze(0)
             x = self.upsample(x).to(device)
 
             idx = torch.randperm(self.num_styles, device=device)[0]
