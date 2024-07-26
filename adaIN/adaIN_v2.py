@@ -38,6 +38,8 @@ class NSTTransform(transforms.Transform):
 
     @torch.no_grad()
     def __call__(self, x):
+
+        x = self.to_tensor(x).unsqueeze(0)
         
         if torch.rand(1).item() < self.probability:
             x = self.to_tensor(x).unsqueeze(0)
