@@ -140,7 +140,7 @@ def _mp_fn(rank, flags):
     batch_size = 1024
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     
-    trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_test)
+    trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
     testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_test)
 
     train_sampler = torch.utils.data.distributed.DistributedSampler(
