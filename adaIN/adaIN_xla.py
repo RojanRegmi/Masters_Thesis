@@ -10,7 +10,6 @@ if module_path not in sys.path:
 import torch
 import torch_xla
 import torch_xla.core.xla_model as xm
-from torch_xla.utils.utils import send_cpu_data_to_device
 
 
 import torch.nn as nn
@@ -70,7 +69,7 @@ class NSTTransform(transforms.Transform):
             tensor = self.to_tensor(img).unsqueeze(0)
             tensor = self.upsample(tensor).to(self.device)
             style_images.append(tensor)
-        return send_cpu_data_to_device(torch.cat(style_images, dim=0), device=self.device)
+        return torch.cat(style_images, dim=0)
 
     @torch.no_grad()
     def style_transfer(self, vgg, decoder, content, style, alpha=1.0):
