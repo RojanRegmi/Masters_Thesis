@@ -67,9 +67,9 @@ class NSTTransform(transforms.Transform):
             img_path = os.path.join(self.style_dir, file)
             img = Image.open(img_path)
             tensor = self.to_tensor(img).unsqueeze(0)
-            tensor = self.upsample(tensor).to(self.device)
+            tensor = self.upsample(tensor)
             style_images.append(tensor)
-        return torch.cat(style_images, dim=0)
+        return torch.cat(style_images, dim=0).to(self.device)
 
     @torch.no_grad()
     def style_transfer(self, vgg, decoder, content, style, alpha=1.0):
