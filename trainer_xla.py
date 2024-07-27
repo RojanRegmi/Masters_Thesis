@@ -153,7 +153,7 @@ def _mp_fn(rank, flags):
     transform_train = transforms.Compose([nst_transfer])
     transform_test = transforms.Compose([transforms.ToTensor()])
 
-    batch_size = 1024
+    batch_size = 256
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
