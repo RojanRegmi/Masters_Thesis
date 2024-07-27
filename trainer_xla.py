@@ -17,7 +17,7 @@ import torch_xla.core.xla_model as xm
 import torch_xla.distributed.parallel_loader as pl
 import torch_xla.distributed.xla_multiprocessing as xmp
 
-from adaIN.adaIN_v2 import NSTTransform
+from adaIN.adaIN_xla import NSTTransform
 import adaIN.net as net
 from resnet_wide import WideResNet_28_4
 
