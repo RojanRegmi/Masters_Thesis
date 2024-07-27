@@ -23,7 +23,7 @@ from resnet_wide import WideResNet_28_4
 
 import sys
 
-os.environ.pop['TPU_PROCESS_ADDRESSES']
+os.environ.pop('TPU_PROCESS_ADDRESSES')
 
 current_dir = os.path.dirname(__file__)
 module_path = os.path.abspath(current_dir)
