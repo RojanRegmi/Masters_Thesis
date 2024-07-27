@@ -135,7 +135,7 @@ def _mp_fn(rank, flags):
     device = xm.xla_device()
     
     vgg, decoder = load_models(device)
-    nst_transfer = NSTTransform(style_dir='/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder)
+    nst_transfer = NSTTransform(style_dir='/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder, device=device)
 
     transform_train = transforms.Compose([nst_transfer])
     transform_test = transforms.Compose([transforms.ToTensor()])

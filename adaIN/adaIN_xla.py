@@ -17,19 +17,13 @@ from PIL import Image
 import net
 from function import adaptive_instance_normalization
 
-# Clear TPU-related environment variables
-os.environ.pop('TPU_PROCESS_ADDRESSES', None)
-
-# Get TPU device
-device = xm.xla_device()
-
 encoder_rel_path = 'models/vgg_normalised.pth'
 decoder_rel_path = 'models/decoder.pth'
 encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_dir, vgg, decoder, alpha=1.0, num_style_img=1000, probability=0.5):
+    def __init__(self, style_dir, vgg, decoder, device, alpha=1.0, num_style_img=1000, probability=0.5):
         super().__init__()
         self.style_dir = style_dir
         self.vgg = vgg
@@ -41,6 +35,7 @@ class NSTTransform(transforms.Transform):
         self.style_images = self.preload_style_images(num_style_img)
         self.num_styles = len(self.style_images)
         self.probability = probability
+        self.device = device
 
     @torch.no_grad()
     def __call__(self, x):
@@ -48,9 +43,9 @@ class NSTTransform(transforms.Transform):
 
         if torch.rand(1).item() < self.probability:
             x = x.unsqueeze(0)
-            x = self.upsample(x).to(device)
+            x = self.upsample(x).to(self.device)
 
-            idx = torch.randint(0, self.num_styles, (1,), device=device)[0]
+            idx = torch.randint(0, self.num_styles, (1,), device=self.device)[0]
             style_image = self.style_images[idx].unsqueeze(0)
             
             stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
@@ -69,9 +64,9 @@ class NSTTransform(transforms.Transform):
             img_path = os.path.join(self.style_dir, file)
             img = Image.open(img_path)
             tensor = self.to_tensor(img).unsqueeze(0)
-            tensor = self.upsample(tensor).to(device)
+            tensor = self.upsample(tensor).to(self.device)
             style_images.append(tensor)
-        return torch.cat(style_images, dim=0).to(device)
+        return torch.cat(style_images, dim=0).to(self.device)
 
     @torch.no_grad()
     def style_transfer(self, vgg, decoder, content, style, alpha=1.0):
