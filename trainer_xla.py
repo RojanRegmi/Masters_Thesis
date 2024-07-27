@@ -176,7 +176,7 @@ def _mp_fn(rank, flags):
 if __name__ == '__main__':
     flags = {}
     flags['num_epochs'] = 50
-    xmp.spawn(_mp_fn, args=(flags,), nprocs=2)
+    xmp.spawn(_mp_fn, args=(flags,))
 
 
 
