@@ -26,7 +26,8 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_dir, vgg, decoder, dev, alpha=1.0, num_style_img=1000, probability=0.5):
+    def __init__(self, style_dir, vgg, decoder, device, alpha=1.0, num_style_img=1000, probability=0.5):
+        print(f"Initializing NSTTransform with device: {device}")
         super().__init__()
         self.style_dir = style_dir
         self.vgg = vgg
@@ -38,7 +39,8 @@ class NSTTransform(transforms.Transform):
         self.style_images = self.preload_style_images(num_style_img)
         self.num_styles = len(self.style_images)
         self.probability = probability
-        self.device = dev
+        self.device = device
+        print(f"NSTTransform initialized with device: {self.device}")
 
     @torch.no_grad()
     def __call__(self, x):
