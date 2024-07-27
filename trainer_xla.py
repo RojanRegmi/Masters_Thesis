@@ -96,6 +96,7 @@ def train_loop_fn(net, loader, optimizer, criterion, device):
         loss.backward()
         xm.optimizer_step(optimizer)
         if i % 10 == 0:
+            xm.mark_step()
             xm.master_print(f'Batch {i}, Loss: {loss.item():.4f}')
 
 def test_loop_fn(net, loader, device):
@@ -173,7 +174,7 @@ def _mp_fn(rank, flags):
 if __name__ == '__main__':
     flags = {}
     flags['num_epochs'] = 50
-    xmp.spawn(_mp_fn, args=(flags,), start_method='fork')
+    xmp.spawn(_mp_fn, args=(flags,), nprocs=2)
 
 
 
