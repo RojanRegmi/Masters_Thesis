@@ -26,17 +26,16 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_dir, vgg, decoder, device, alpha=1.0, num_style_img=1000, probability=0.5):
+    def __init__(self, style_image_list, vgg, decoder, device, alpha=1.0, probability=0.5):
         print(f"Initializing NSTTransform with device: {device}")
         super().__init__()
-        self.style_dir = style_dir
         self.vgg = vgg
         self.decoder = decoder
         self.alpha = alpha
         self.upsample = nn.Upsample(size=(224, 224), mode='bilinear', align_corners=False)
         self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=False)
         self.to_tensor = transforms.ToTensor()
-        self.style_images = self.preload_style_images(num_style_img)
+        self.style_images = style_image_list
         self.num_styles = len(self.style_images)
         self.probability = probability
         self.device = device
@@ -60,19 +59,7 @@ class NSTTransform(transforms.Transform):
         
         else:
             return x
-
-    def preload_style_images(self, num_style_img):
-        style_images = []
-        total_images = os.listdir(self.style_dir)
-        subset_imgs = total_images[0:num_style_img]
-        for file in subset_imgs:
-            img_path = os.path.join(self.style_dir, file)
-            img = Image.open(img_path)
-            tensor = self.to_tensor(img).unsqueeze(0)
-            tensor = self.upsample(tensor)
-            style_images.append(tensor)
-        return torch.cat(style_images, dim=0).to(self.device)
-
+        
     @torch.no_grad()
     def style_transfer(self, vgg, decoder, content, style, alpha=1.0):
         content_f = vgg(content)

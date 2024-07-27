@@ -128,12 +128,27 @@ def trainer_fn(net, trainloader, testloader, device, epochs=50, save_path='./cif
     xm.save(net.state_dict(), save_path)
     xm.master_print('Finished Training')
 
+def preload_style_images(style_dir, device, num_style_img=1000):
+    style_images = []
+    total_images = os.listdir(style_dir)
+    to_tensor = transforms.ToTensor()
+    upsample = nn.Upsample(size=(224, 224), mode='bilinear', align_corners=False)
+    subset_imgs = total_images[0:num_style_img]
+    for file in subset_imgs:
+        img_path = os.path.join(style_dir, file)
+        img = Image.open(img_path)
+        tensor = to_tensor(img).unsqueeze(0)
+        tensor = upsample(tensor).to(device)
+        style_images.append(tensor)
+    return torch.cat(style_images, dim=0).to(device)
+
 def _mp_fn(rank, flags):
     torch.set_default_tensor_type('torch.FloatTensor')
     device = xm.xla_device()
     
     vgg, decoder = load_models(device)
-    nst_transfer = NSTTransform(style_dir='/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder, device=device)
+    style_image_list = preload_style_images(style_dir='/kaggle/input/painter-by-numbers-resized', device=device)
+    nst_transfer = NSTTransform(style_image_list=style_image_list, vgg=vgg, decoder=decoder, device=device)
 
     transform_train = transforms.Compose([nst_transfer])
     transform_test = transforms.Compose([transforms.ToTensor()])
