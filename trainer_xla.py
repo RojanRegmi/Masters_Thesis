@@ -128,7 +128,7 @@ def trainer_fn(net, trainloader, testloader, device, epochs=50, save_path='./cif
     xm.save(net.state_dict(), save_path)
     xm.master_print('Finished Training')
 
-def preload_style_images(style_dir, device, num_style_img=1000):
+def preload_style_images(style_dir, device, num_style_img=250):
     style_images = []
     total_images = os.listdir(style_dir)
     to_tensor = transforms.ToTensor()
