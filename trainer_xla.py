@@ -123,12 +123,12 @@ def trainer_fn(net, trainloader, testloader, device, epochs=50, save_path='./cif
         train_loop_fn(net, trainloader, optimizer, criterion, device)
         test_accuracy = test_loop_fn(net, testloader, device)
         scheduler.step()
-        xm.master_print(f'Epoch {epoch + 1} Test Accuracy: {test_accuracy:.2f}%')
+        xm.master_print(f'Epochss {epoch + 1} Test Accuracy: {test_accuracy:.2f}%')
 
     xm.save(net.state_dict(), save_path)
     xm.master_print('Finished Training')
 
-def preload_style_images(style_dir, device, num_style_img=100):
+def preload_style_images(style_dir, device, num_style_img=500):
     style_images = []
     total_images = os.listdir(style_dir)
     to_tensor = transforms.ToTensor()
@@ -138,7 +138,7 @@ def preload_style_images(style_dir, device, num_style_img=100):
         img_path = os.path.join(style_dir, file)
         img = Image.open(img_path)
         tensor = to_tensor(img).unsqueeze(0)
-        tensor = upsample(tensor).to(device)
+        tensor = upsample(tensor)
         style_images.append(tensor)
     return torch.cat(style_images, dim=0)
 
