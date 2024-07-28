@@ -50,7 +50,7 @@ class NSTTransform(transforms.Transform):
             x = self.upsample(x).to(self.device)
 
             idx = torch.randint(0, self.num_styles, (1,), device=self.device)[0]
-            style_image = self.style_images[idx].unsqueeze(0)
+            style_image = self.style_images[idx].unsqueeze(0).to(self.device)
             
             stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
             xm.mark_step()

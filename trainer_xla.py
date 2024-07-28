@@ -128,7 +128,7 @@ def trainer_fn(net, trainloader, testloader, device, epochs=50, save_path='./cif
     xm.save(net.state_dict(), save_path)
     xm.master_print('Finished Training')
 
-def preload_style_images(style_dir, device, num_style_img=250):
+def preload_style_images(style_dir, device, num_style_img=100):
     style_images = []
     total_images = os.listdir(style_dir)
     to_tensor = transforms.ToTensor()
@@ -140,7 +140,7 @@ def preload_style_images(style_dir, device, num_style_img=250):
         tensor = to_tensor(img).unsqueeze(0)
         tensor = upsample(tensor).to(device)
         style_images.append(tensor)
-    return torch.cat(style_images, dim=0).to(device)
+    return torch.cat(style_images, dim=0)
 
 def _mp_fn(rank, flags):
     torch.set_default_tensor_type('torch.FloatTensor')
@@ -189,7 +189,7 @@ def _mp_fn(rank, flags):
 if __name__ == '__main__':
     flags = {}
     flags['num_epochs'] = 50
-    xmp.spawn(_mp_fn, args=(flags,), nprocs=8, start_method='fork')
+    xmp.spawn(_mp_fn, args=(flags,), start_method='fork')
 
 
 
