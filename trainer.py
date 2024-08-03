@@ -205,7 +205,7 @@ if __name__ == '__main__' :
 
     style_feats = load_feat_files(feats_dir='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', device=device)
 
-    nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, prob_ratio=args.prob_ratio)
+    nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio)
 
     transform_train = transforms.Compose([
         nst_transfer,
