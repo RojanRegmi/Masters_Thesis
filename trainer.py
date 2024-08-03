@@ -162,9 +162,9 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
         test_accuracy = 100 * correct/total
 
-        epoch_time = time.time() - epoch_start_time
+        epoch_time = (time.time() - epoch_start_time) / 60
             
-        print(f'Epoch {epoch + 1} Time {epoch_time} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
+        print(f'Epoch {epoch + 1} Time {epoch_time} Mins Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
          # Save checkpoint every 25 epochs
