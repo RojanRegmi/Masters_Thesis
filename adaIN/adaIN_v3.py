@@ -56,7 +56,7 @@ class NSTTransform(transforms.Transform):
             return stl_img
         
         else:
-            return x
+            return x.to(device)
 
     def preload_style_images(self, num_style_img):
         style_images = []
