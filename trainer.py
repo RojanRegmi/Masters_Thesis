@@ -21,7 +21,7 @@ import time
 import logging
 import argparse
 
-from adaIN.adaIN_v2 import NSTTransform
+from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
 from resnet_wide import WideResNet_28_4
 
@@ -92,6 +92,13 @@ def load_models(device):
     decoder.to(device).eval()
     return vgg, decoder
 
+def load_feat_files(feats_dir, device):
+
+    style_feats_np = np.load(feats_dir)
+    style_feats_tensor = torch.from_numpy(style_feats_np)
+    style_feats_tensor = style_feats_tensor.to(device)
+    return style_feats_tensor
+
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
 
@@ -154,9 +161,10 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
                 correct += (predicted==labels).sum().item()
 
         test_accuracy = 100 * correct/total
+
+        epoch_time = time.time() - epoch_start_time
             
-            
-        print(f'Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
+        print(f'Epoch {epoch + 1} Time {epoch_time} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
          # Save checkpoint every 25 epochs
@@ -195,7 +203,9 @@ if __name__ == '__main__' :
 
     vgg, decoder = load_models(device=device)
 
-    nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder, alpha=args.alpha, prob_ratio=args.prob_ratio)
+    style_feats = load_feat_files(feats_dir='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', device=device)
+
+    nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, prob_ratio=args.prob_ratio)
 
     transform_train = transforms.Compose([
         nst_transfer,
