@@ -1,6 +1,5 @@
 import torch
 import torch.multiprocessing as mp
-import random
 import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -8,8 +7,8 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 import torch.optim as optim
 import torch.nn.functional as F
 
+
 import torch.nn as nn
-import torch.nn.init as init
 from PIL import Image
 
 import numpy as np
@@ -17,7 +16,10 @@ import numpy as np
 import pickle
 from torch.utils.data import Dataset
 import os
+
+import time
 import logging
+import argparse
 
 from adaIN.adaIN_v2 import NSTTransform
 import adaIN.net as net
@@ -79,7 +81,7 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models():
+def load_models(device):
     vgg = net.vgg
     decoder = net.decoder
     vgg.load_state_dict(torch.load(encoder_path))
@@ -103,8 +105,10 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
     # Initialize the scheduler
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs)  # Cosine Annealing LR Scheduler
 
+   
     for epoch in range(epochs):
 
+        epoch_start_time = time.time()
         running_loss = 0.0
         total_train = 0
         correct_train = 0
@@ -136,6 +140,9 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
             if i % 10 == 0:
                 logger.info(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
+        
+        train_accuracy = 100 * correct_train/total_train
+        train_loss = running_loss/len(trainloader)
 
         with torch.no_grad():
             net.eval()
@@ -145,24 +152,50 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted==labels).sum().item()
-        
+
+        test_accuracy = 100 * correct/total
+            
+            
         print(f'Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
+         # Save checkpoint every 25 epochs
+        if (epoch + 1) % 25 == 0:
+            checkpoint_path = f'./checkpoint_epoch_{epoch+1}.pth'
+            torch.save({
+                'epoch': epoch + 1,
+                'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'scheduler_state_dict': scheduler.state_dict(),
+                'train_loss': train_loss,
+                'train_accuracy': train_accuracy,
+                'test_accuracy': test_accuracy
+            }, checkpoint_path)
+            logger.info(f"Checkpoint saved at {checkpoint_path}")
+
+
         scheduler.step()
-    
+
     torch.save(net.state_dict(), save_path)
     print('Finished Training')
 
 if __name__ == '__main__' :
 
+    parser = argparse.ArgumentParser(description='CIFAR-10 training with style transfer')
+    parser.add_argument('--batch_size', type=int, default=512, help='batch size for training (default: 512)')
+    parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)')
+    parser.add_argument('--alpha', type=float, default=1.0, help='alpha value for style transfer (default: 1.0)')
+    parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
+
+    args = parser.parse_args()
+
     mp.set_start_method('spawn', force=True)
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    vgg, decoder = load_models()
+    vgg, decoder = load_models(device=device)
 
-    nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder)
+    nst_transfer = NSTTransform(style_dir = '/kaggle/input/painter-by-numbers-resized', vgg=vgg, decoder=decoder, alpha=args.alpha, prob_ratio=args.prob_ratio)
 
     transform_train = transforms.Compose([
         nst_transfer,
@@ -178,7 +211,7 @@ if __name__ == '__main__' :
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    batch_size = 512
+    batch_size = args.batch_size
 
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
@@ -192,7 +225,7 @@ if __name__ == '__main__' :
     net = WideResNet_28_4(num_classes=10)
     net.to(device)
 
-    trainer_fn(epochs=50, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
+    trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
 
 
     

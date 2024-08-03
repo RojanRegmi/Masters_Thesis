@@ -43,8 +43,10 @@ class NSTTransform(transforms.Transform):
 
         if torch.rand(1).item() < self.probability:
 
-            x = x.unsqueeze(0)
-            x = self.upsample(x).to(device)
+            x = x.to(device).unsqueeze(0)
+            x = self.upsample(x)
+            #x = x.unsqueeze(0)
+            #x = self.upsample(x).to(device)
 
             idx = torch.randperm(self.num_styles, device=device)[0]
             style_image = self.style_images[idx].unsqueeze(0)
