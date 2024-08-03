@@ -32,7 +32,7 @@ class NSTTransform(transforms.Transform):
         self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=False)
         self.to_tensor = transforms.ToTensor()
         self.style_features = style_feats
-        self.num_styles = len(self.style_images)
+        self.num_styles = len(self.style_features)
         self.probability = probability
 
     @torch.no_grad()
