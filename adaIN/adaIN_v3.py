@@ -52,7 +52,7 @@ class NSTTransform(transforms.Transform):
             
             stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
             
-            stl_img = self.downsample(stl_img).squeeze(0).cpu()
+            stl_img = self.downsample(stl_img).squeeze(0)
             return stl_img
         
         else:
