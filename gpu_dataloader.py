@@ -42,6 +42,13 @@ class GPUTransformDataLoader(DataLoader):
                 break
 
     def _process_batch(self, batch):
+        # Debugging: Print batch structure
+        print(f"Batch type: {type(batch)}, Batch contents: {batch}")
+        
+        # Ensure batch is a list of (img, target) tuples
+        if not all(isinstance(item, tuple) and len(item) == 2 for item in batch):
+            raise ValueError(f"Unexpected batch format: {batch}")
+        
         # Separate images and targets
         images, targets = zip(*batch)
         
@@ -62,9 +69,10 @@ class GPUTransformDataLoader(DataLoader):
         targets = torch.tensor(targets).to(self.device)
         
         # Apply GPU transform
-        transformed_images = self.gpu_transform((images, targets))
+        transformed_images = self.gpu_transform(images)
         
         return transformed_images, targets
+
 
     def __iter__(self):
         self.batch_sampler_iter = iter(self.batch_sampler)
