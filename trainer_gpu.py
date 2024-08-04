@@ -218,12 +218,12 @@ if __name__ == '__main__' :
     nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio)
 
     transform_train = transforms.Compose([
-        nst_transfer,
+        #nst_transfer,
         #transforms.RandomHorizontalFlip(),
         
         #transforms.RandomCrop(32, padding=4),  
         #TrivialAugmentWide(),
-        #transforms.ToTensor(),
+        transforms.ToTensor()
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     transform_test = transforms.Compose([
@@ -234,7 +234,7 @@ if __name__ == '__main__' :
     batch_size = args.batch_size
 
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
-    trainset = CIFAR10(data_dir=cifar_10_dir, train=True)
+    trainset = CIFAR10(data_dir=cifar_10_dir, train=True, transform=transform_train)
     # Set up your data loaders
     trainloader = GPUTransformDataLoader(
         trainset,
