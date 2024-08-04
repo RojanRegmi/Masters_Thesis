@@ -21,7 +21,8 @@ import time
 import logging
 import argparse
 
-from adaIN.adaIN_v3 import NSTTransform
+from adaIN.adaIN_gpu import NSTTransform
+from gpu_dataloader import GPUTransformDataLoader
 import adaIN.net as net
 from resnet_wide import WideResNet_28_4
 
@@ -163,6 +164,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
         test_accuracy = 100 * correct/total
 
         epoch_time = (time.time() - epoch_start_time) / 60
+        
             
         print(f'Epoch {epoch + 1} Time {epoch_time} Mins Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
@@ -180,9 +182,10 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
                 'test_accuracy': test_accuracy
             }, checkpoint_path)
             logger.info(f"Checkpoint saved at {checkpoint_path}")
-        
+
         torch.cuda.empty_cache()
-        
+
+
         scheduler.step()
 
     torch.save(net.state_dict(), save_path)
@@ -191,7 +194,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 if __name__ == '__main__' :
 
     parser = argparse.ArgumentParser(description='CIFAR-10 training with style transfer')
-    parser.add_argument('--batch_size', type=int, default=512, help='batch size for training (default: 512)')
+    parser.add_argument('--batch_size', type=int, default=256, help='batch size for training (default: 256)')
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)')
     parser.add_argument('--alpha', type=float, default=1.0, help='alpha value for style transfer (default: 1.0)')
     parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
@@ -205,6 +208,12 @@ if __name__ == '__main__' :
     vgg, decoder = load_models(device=device)
 
     style_feats = load_feat_files(feats_dir='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', device=device)
+
+    def gpu_transform(batch):
+        images, labels = batch
+        transformed_images = nst_transfer(images)
+        return transformed_images, labels
+
 
     nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio)
 
@@ -225,9 +234,19 @@ if __name__ == '__main__' :
     batch_size = args.batch_size
 
     cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
-    trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4)
+    trainset = CIFAR10(data_dir=cifar_10_dir, train=True)
+    # Set up your data loaders
+    trainloader = GPUTransformDataLoader(
+        trainset,
+        batch_size=64,
+        shuffle=True,
+        num_workers=4,
+        pin_memory=True,
+        gpu_transform=gpu_transform,
+        prefetch_factor=2,
+        device=device
+    )
+
 
     testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
