@@ -40,16 +40,12 @@ class GPUTransformDataLoader(DataLoader):
                 break
 
     def _process_batch(self, batch):
-        # Convert list of samples to a batch tensor
-        if isinstance(batch[0], tuple):  # If your dataset returns (data, target) pairs
-            data = [item[0] for item in batch]
-            targets = [item[1] for item in batch]
-            data = torch.stack(data).to(self.device)
-            targets = torch.tensor(targets).to(self.device)
-            data = self.gpu_transform((data, targets))
-        else:  # If your dataset only returns data
-            data = torch.stack(batch).to(self.device)
-            data = self.gpu_transform(data)
+        
+        data = [item[0] for item in batch]
+        targets = [item[1] for item in batch]
+        data = torch.stack(data).to(self.device)
+        targets = torch.tensor(targets).to(self.device)
+        data = self.gpu_transform((data, targets))
         return data
 
     def __iter__(self):
