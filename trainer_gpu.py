@@ -57,6 +57,7 @@ class CIFAR10(Dataset):
                     entry = pickle.load(f, encoding='bytes')
                     self.data.extend(entry[b'data'])
                     self.targets.extend(entry[b'labels'])
+            self.data = np.concatenate(self.data)
         else:
             file_path = os.path.join(data_dir, 'test_batch')
             with open(file_path, 'rb') as f:
@@ -64,14 +65,13 @@ class CIFAR10(Dataset):
                 self.data = entry[b'data']
                 self.targets = entry[b'labels']
         
-        self.data = np.array(self.data, dtype=np.uint8)
+        self.data = self.data.reshape(-1, 3, 32, 32)
         self.targets = np.array(self.targets)
         
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, index):
-        img = self.data[index].reshape(3, 32, 32)
         img = np.transpose(img, (1, 2, 0))
         img = Image.fromarray(img)
         
@@ -240,7 +240,7 @@ if __name__ == '__main__' :
     # Set up your data loaders
     trainloader = GPUTransformDataLoader(
         trainset,
-        batch_size=args.batch_size,
+        batch_size=batch_size,
         shuffle=True,
         num_workers=4,
         pin_memory=True,
