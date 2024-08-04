@@ -215,7 +215,7 @@ if __name__ == '__main__' :
         return transformed_images, labels
 
 
-    nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio)
+    nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio).to(device)
 
     transform_train = transforms.Compose([
         #nst_transfer,
@@ -238,7 +238,7 @@ if __name__ == '__main__' :
     # Set up your data loaders
     trainloader = GPUTransformDataLoader(
         trainset,
-        batch_size=64,
+        batch_size=args.batch_size,
         shuffle=True,
         num_workers=4,
         pin_memory=True,
