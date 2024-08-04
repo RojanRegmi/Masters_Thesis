@@ -72,7 +72,7 @@ class CIFAR10(Dataset):
         return len(self.data)
     
     def __getitem__(self, index):
-        img = np.transpose(img, (1, 2, 0))
+        img = self.data[index].transpose((1, 2, 0))
         img = Image.fromarray(img)
         
         if self.transform:
