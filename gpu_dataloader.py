@@ -49,7 +49,6 @@ class GPUTransformDataLoader(DataLoader):
 
     def __iter__(self):
         self.batch_sampler_iter = iter(self.batch_sampler)
-        self.preprocess_thread.start()
         return self
 
     def __next__(self):
