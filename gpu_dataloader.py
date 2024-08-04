@@ -40,13 +40,29 @@ class GPUTransformDataLoader(DataLoader):
                 break
 
     def _process_batch(self, batch):
+        # Separate images and targets
+        images, targets = zip(*batch)
         
-        data = [item[0] for item in batch]
-        targets = [item[1] for item in batch]
-        data = torch.stack(data).to(self.device)
+        # Convert images to a single tensor
+        if isinstance(images[0], Image.Image):
+            # If images are PIL Images, convert to tensors
+            images = torch.stack([transforms.ToTensor()(img) for img in images])
+        elif isinstance(images[0], torch.Tensor):
+            # If images are already tensors, just stack them
+            images = torch.stack(images)
+        else:
+            raise TypeError(f"Unexpected image type: {type(images[0])}")
+        
+        # Move images to GPU
+        images = images.to(self.device)
+        
+        # Convert targets to tensor and move to GPU
         targets = torch.tensor(targets).to(self.device)
-        data = self.gpu_transform((data, targets))
-        return data
+        
+        # Apply GPU transform
+        transformed_images = self.gpu_transform((images, targets))
+        
+        return transformed_images, targets
 
     def __iter__(self):
         self.batch_sampler_iter = iter(self.batch_sampler)

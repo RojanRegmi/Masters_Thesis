@@ -198,6 +198,8 @@ if __name__ == '__main__' :
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)')
     parser.add_argument('--alpha', type=float, default=1.0, help='alpha value for style transfer (default: 1.0)')
     parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
+    parser.add_argument('--content_dir', type=str, default='/kaggle/input/cifar10-python/cifar-10-batches-py/', help='CIFAR10 Directory')
+    parser.add_argument('--style_dir', type=str, default='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', help='Style_feats_directory')
 
     args = parser.parse_args()
 
@@ -207,7 +209,7 @@ if __name__ == '__main__' :
 
     vgg, decoder = load_models(device=device)
 
-    style_feats = load_feat_files(feats_dir='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', device=device)
+    style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
     def gpu_transform(batch):
         images, labels = batch
@@ -233,7 +235,7 @@ if __name__ == '__main__' :
 
     batch_size = args.batch_size
 
-    cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
+    cifar_10_dir = args.content_dir
     trainset = CIFAR10(data_dir=cifar_10_dir, train=True, transform=transform_train)
     # Set up your data loaders
     trainloader = GPUTransformDataLoader(
@@ -252,10 +254,10 @@ if __name__ == '__main__' :
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
     
-    net = WideResNet_28_4(num_classes=10)
-    net.to(device)
+    network = WideResNet_28_4(num_classes=10)
+    network.to(device)
 
-    trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
+    trainer_fn(epochs=args.epochs, net=network, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
 
 
     
