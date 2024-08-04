@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 import threading
 import queue
+import time
 
 class GPUTransformDataLoader(DataLoader):
     def __init__(self, dataset, batch_size=1, shuffle=False, num_workers=0, 
@@ -26,6 +27,11 @@ class GPUTransformDataLoader(DataLoader):
         torch.cuda.set_device(self.device)
         while not self.stop_event.is_set():
             try:
+
+                if not hasattr(self, 'batch_sampler_iter'):
+                    time.sleep(0.1)
+                    continue
+
                 batch = next(self.batch_sampler_iter)
                 with torch.cuda.stream(self.stream):
                     processed_batch = self._process_batch(batch)
@@ -43,6 +49,7 @@ class GPUTransformDataLoader(DataLoader):
 
     def __iter__(self):
         self.batch_sampler_iter = iter(self.batch_sampler)
+        self.preprocess_thread.start()
         return self
 
     def __next__(self):
