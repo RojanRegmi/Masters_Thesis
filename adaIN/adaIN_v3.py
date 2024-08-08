@@ -45,7 +45,7 @@ class NSTTransform(transforms.Transform):
 
         x = self.to_tensor(x)
         self.alpha = self.randomize_alpha()
-        effective_prob = self.probability * (1.0 - self.alpha) ** 2
+        effective_prob = (1.0 - self.alpha)
 
         if torch.rand(1).item() < effective_prob:
 
