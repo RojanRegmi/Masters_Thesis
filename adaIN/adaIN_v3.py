@@ -47,7 +47,7 @@ class NSTTransform(transforms.Transform):
         self.alpha = self.randomize_alpha()
         effective_prob = (1.0 - self.alpha)
 
-        if torch.rand(1).item() < effective_prob:
+        if torch.rand(1).item() < self.probability:
 
             x = x.to(device).unsqueeze(0)
             x = self.upsample(x)
