@@ -1,5 +1,16 @@
 from torchvision import transforms
 import torch
+from adaIN.net import vgg
+
+import os
+import sys
+
+current_dir = os.path.dirname(__file__)
+module_path = os.path.abspath(current_dir)
+vgg_weights_path = os.path.join(current_dir, 'adaIN/models/vgg_normalised.pth')
+
+if module_path not in sys.path:
+    sys.path.append(module_path)
 
 def downsample_image(image, size=(32, 32)):
     """
@@ -20,3 +31,5 @@ def downsample_image(image, size=(32, 32)):
     downsampled_image = transform_to_pil(downsampled_tensor.squeeze(0))  # Remove batch dimension
 
     return downsampled_image
+
+def generate_style_feats()

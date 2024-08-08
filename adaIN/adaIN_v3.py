@@ -34,13 +34,20 @@ class NSTTransform(transforms.Transform):
         self.style_features = style_feats
         self.num_styles = len(self.style_features)
         self.probability = probability
+    
+    def randomize_alpha(self):
+
+        alpha_values = [round(x, 1) for x in torch.arange(0.2, 1.0, 0.1).tolist()]
+        return random.choice(alpha_values)
 
     @torch.no_grad()
     def __call__(self, x):
 
         x = self.to_tensor(x)
+        self.alpha = self.randomize_alpha()
+        effective_prob = self.probability * (1.0 - self.alpha) ** 2
 
-        if torch.rand(1).item() < self.probability:
+        if torch.rand(1).item() < effective_prob:
 
             x = x.to(device).unsqueeze(0)
             x = self.upsample(x)
