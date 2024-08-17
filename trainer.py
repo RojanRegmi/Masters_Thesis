@@ -1,6 +1,6 @@
 import torch
 import torch.multiprocessing as mp
-import torchvision.transforms as transforms, TrivialAugmentWide
+import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
@@ -221,7 +221,7 @@ if __name__ == '__main__' :
         transforms.RandomHorizontalFlip(),
         
         transforms.RandomCrop(32, padding=4),  
-        TrivialAugmentWide(),
+        transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
