@@ -23,7 +23,7 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
-    def __init__(self, style_feats, vgg, decoder, alpha=1.0, num_style_img=1000, probability=0.5):
+    def __init__(self, style_feats, vgg, decoder, alpha=1.0, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1):
         super().__init__()
         self.vgg = vgg
         self.decoder = decoder
@@ -34,18 +34,23 @@ class NSTTransform(transforms.Transform):
         self.style_features = style_feats
         self.num_styles = len(self.style_features)
         self.probability = probability
+        self.randomize = randomize
+        self.rand_min = rand_min
+        self.rand_max = rand_max
     
     def randomize_alpha(self):
 
-        alpha_values = [round(x, 1) for x in torch.arange(0.2, 1.0, 0.1).tolist()]
+        alpha_values = [round(x, 1) for x in torch.arange(self.rand_min, self.rand_max, 0.1).tolist()]
         return random.choice(alpha_values)
 
     @torch.no_grad()
     def __call__(self, x):
 
         x = self.to_tensor(x)
-        self.alpha = self.randomize_alpha()
-        effective_prob = (1.0 - self.alpha)
+        if self.randomize:
+            self.alpha = self.randomize_alpha()
+
+        # effective_prob = (1.0 - self.alpha)
 
         if torch.rand(1).item() < self.probability:
 
