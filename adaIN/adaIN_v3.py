@@ -37,6 +37,7 @@ class NSTTransform(transforms.Transform):
         self.randomize = randomize
         self.rand_min = rand_min
         self.rand_max = rand_max
+        self.to_pil_img = transforms.ToPILImage()
     
     def randomize_alpha(self):
 
@@ -46,7 +47,7 @@ class NSTTransform(transforms.Transform):
     @torch.no_grad()
     def __call__(self, x):
 
-        x = self.to_tensor(x)
+        
         if self.randomize:
             self.alpha = self.randomize_alpha()
 
@@ -54,6 +55,7 @@ class NSTTransform(transforms.Transform):
 
         if torch.rand(1).item() < self.probability:
 
+            x = self.to_tensor(x)
             x = x.to(device).unsqueeze(0)
             x = self.upsample(x)
             #x = x.unsqueeze(0)
@@ -65,10 +67,24 @@ class NSTTransform(transforms.Transform):
             stl_img = self.style_transfer(self.vgg, self.decoder, x, style_image, alpha=self.alpha)
             
             stl_img = self.downsample(stl_img).squeeze(0).cpu()
-            return stl_img
+
+            stl_img = self.norm_style_tensor(stl_img)
+            
+            style_image = self.to_pil_img(stl_img)
+
+            return style_image
         
         else:
             return x
+    
+    def norm_style_tensor(self, tensor):
+        min_val = tensor.min()
+        max_val = tensor.max()
+
+        normalized_tensor = (tensor - min_val) / (max_val - min_val)
+        scaled_tensor = normalized_tensor * 255
+        scaled_tensor = scaled_tensor.byte() # converts dtype to torch.uint8 between 0 and 255
+        return scaled_tensor
 
     def preload_style_images(self, num_style_img):
         style_images = []
