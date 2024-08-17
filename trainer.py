@@ -1,6 +1,6 @@
 import torch
 import torch.multiprocessing as mp
-import torchvision.transforms as transforms
+import torchvision.transforms as transforms, TrivialAugmentWide
 from torch.optim.lr_scheduler import StepLR
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
