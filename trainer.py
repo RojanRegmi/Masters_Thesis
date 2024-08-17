@@ -1,4 +1,4 @@
-import torch
+ import torch
 import torch.multiprocessing as mp
 import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR
@@ -164,7 +164,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
         epoch_time = (time.time() - epoch_start_time) / 60
             
-        print(f'Epoch {epoch + 1} Time {epoch_time} Mins Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
+        print(f'Epoch {epoch + 1} Time {epoch_time:.4f} Mins Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}')
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
          # Save checkpoint every 25 epochs
@@ -188,6 +188,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
     torch.save(net.state_dict(), save_path)
     print('Finished Training')
 
+
 if __name__ == '__main__' :
 
     parser = argparse.ArgumentParser(description='CIFAR-10 training with style transfer')
@@ -195,6 +196,10 @@ if __name__ == '__main__' :
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)')
     parser.add_argument('--alpha', type=float, default=1.0, help='alpha value for style transfer (default: 1.0)')
     parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
+    parser.add_argument('--train_transform', type=str, required=True, default=None, help="specify a torchvision.transforms.Compose pipeline as a string(default: (nst_transfer only))")
+    parser.add_argument('--content_dir', type=str, default='/kaggle/input/cifar10-python/cifar-10-batches-py/', help='CIFAR10 Directory')
+    parser.add_argument('--style_dir', type=str, default='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', help='Style_feats_directory')
+
 
     args = parser.parse_args()
 
@@ -204,19 +209,24 @@ if __name__ == '__main__' :
 
     vgg, decoder = load_models(device=device)
 
-    style_feats = load_feat_files(feats_dir='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', device=device)
+    style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
     nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio)
-
-    transform_train = transforms.Compose([
-        nst_transfer,
-        #transforms.RandomHorizontalFlip(),
-        
-        #transforms.RandomCrop(32, padding=4),  
-        #TrivialAugmentWide(),
-        #transforms.ToTensor(),
-        #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    
+    if args.train_transform is None:
+        transform_train = transforms.Compose([
+            nst_transfer,
+            #transforms.RandomHorizontalFlip(),
+            
+            #transforms.RandomCrop(32, padding=4),  
+            #TrivialAugmentWide(),
+            #transforms.ToTensor(),
+            #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+    
+    else:
+        transform_train = eval(args.train_transform)
+    
     transform_test = transforms.Compose([
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -224,7 +234,7 @@ if __name__ == '__main__' :
 
     batch_size = args.batch_size
 
-    cifar_10_dir = '/kaggle/input/cifar10-python/cifar-10-batches-py/'
+    cifar_10_dir = args.content_dir
     trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
