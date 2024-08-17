@@ -168,7 +168,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
         logger.info(f"Epoch {epoch + 1} Train Accuracy: {100 * correct_train / total_train}, Test Accuracy: {100 * correct / total}")
 
          # Save checkpoint every 25 epochs
-        if (epoch + 1) % 25 == 0:
+        if (epoch + 1) % 25 == 0 or epoch == epochs:
             checkpoint_path = f'./checkpoint_epoch_{epoch+1}.pth'
             torch.save({
                 'epoch': epoch + 1,
