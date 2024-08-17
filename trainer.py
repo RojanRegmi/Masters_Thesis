@@ -187,7 +187,14 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
     torch.save(net.state_dict(), save_path)
     print('Finished Training')
-
+transform_options = {
+    "nst": transforms.Compose([nst_transfer]),
+    "augmented": transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+    ]),
+}
 
 if __name__ == '__main__' :
 
@@ -196,7 +203,6 @@ if __name__ == '__main__' :
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)')
     parser.add_argument('--alpha', type=float, default=1.0, help='alpha value for style transfer (default: 1.0)')
     parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
-    parser.add_argument('--train_transform', type=str, required=True, default=None, help="specify a torchvision.transforms.Compose pipeline as a string(default: (nst_transfer only))")
     parser.add_argument('--content_dir', type=str, default='/kaggle/input/cifar10-python/cifar-10-batches-py/', help='CIFAR10 Directory')
     parser.add_argument('--style_dir', type=str, default='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', help='Style_feats_directory')
 
@@ -213,19 +219,18 @@ if __name__ == '__main__' :
 
     nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio)
     
-    if args.train_transform is None:
-        transform_train = transforms.Compose([
-            nst_transfer,
-            #transforms.RandomHorizontalFlip(),
-            
-            #transforms.RandomCrop(32, padding=4),  
-            #TrivialAugmentWide(),
-            #transforms.ToTensor(),
-            #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+ 
+    transform_train = transforms.Compose([
+        nst_transfer,
+        transforms.RandomHorizontalFlip(),
+        
+        transforms.RandomCrop(32, padding=4),  
+        #TrivialAugmentWide(),
+        #transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
     
-    else:
-        transform_train = eval(args.train_transform)
+ 
     
     transform_test = transforms.Compose([
         transforms.ToTensor(),
