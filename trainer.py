@@ -226,7 +226,7 @@ if __name__ == '__main__' :
     
     transform_test = transforms.Compose([
         transforms.ToTensor(),
-        #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
     batch_size = args.batch_size
