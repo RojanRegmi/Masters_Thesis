@@ -187,14 +187,6 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
     torch.save(net.state_dict(), save_path)
     print('Finished Training')
-transform_options = {
-    "nst": transforms.Compose([nst_transfer]),
-    "augmented": transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-    ]),
-}
 
 if __name__ == '__main__' :
 
