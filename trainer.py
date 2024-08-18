@@ -233,6 +233,10 @@ if __name__ == '__main__' :
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
+    print("Transforms in transform_train: ")
+    for t in transform_train.transforms:
+        print(type(t))
+
     batch_size = args.batch_size
 
     cifar_10_dir = args.content_dir
