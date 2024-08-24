@@ -205,7 +205,7 @@ if __name__ == '__main__' :
 
     args = parser.parse_args()
 
-    mp.set_start_method('spawn', force=True)
+    mp.set_start_method('spawn', force=True) 
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -221,7 +221,7 @@ if __name__ == '__main__' :
         transforms.RandomHorizontalFlip(),
         
         transforms.RandomCrop(32, padding=4),  
-        #transforms.TrivialAugmentWide(),
+        transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
