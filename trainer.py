@@ -24,6 +24,7 @@ import argparse
 from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
 from resnet_wide import WideResNet_28_4
+from geo_trivialaugment import GeometricTrivialAugmentWide
 
 import sys
 
@@ -220,8 +221,9 @@ if __name__ == '__main__' :
         nst_transfer,
         transforms.RandomHorizontalFlip(),
         
-        transforms.RandomCrop(32, padding=4),  
-        transforms.TrivialAugmentWide(),
+        transforms.RandomCrop(32, padding=4),
+        GeometricTrivialAugmentWide(),  
+        #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
