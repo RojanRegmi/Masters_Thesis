@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
 import torch
-from torch import tensor
+from torch import Tensor
 
 import torchvision.transforms.functional as F 
 from torchvision.transforms.functional import InterpolationMode
