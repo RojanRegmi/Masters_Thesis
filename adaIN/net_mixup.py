@@ -158,6 +158,6 @@ class Net_D(nn.Module):
         return input
 
     def forward(self, f11, f22):
-        t = np.random.uniform(0, 1)[0]
+        t = np.random.uniform(0, 1)
         return self.decoder(t*f11 + (1 - t) * f22)
         # return self.decoder(t * f11 + (1.0-rc-rs+t) * f22 + (rc-t) * adain(f11, f22) + (rs-t) * adain(f22, f11))
