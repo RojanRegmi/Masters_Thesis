@@ -23,6 +23,21 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
 class NSTTransform(transforms.Transform):
+
+    """ A class to apply neural style transfer with the help of adaIN to datasets in the training pipeline.
+
+    Parameters:
+
+    style_feats: Style features extracted from the style images using adaIN Encoder
+    vgg: AdaIN Encoder
+    decoder: AdaIN Decoder
+    alpha = Strength of style transfer [between 0 and 1]
+    probability = Probability of applying style transfer [between 0 and 1]
+    randomize = randomly selected strength of alpha from a given range
+    rand_min = Minimum value of alpha if randomized
+    rand_max = Maximum value of alpha if randomized
+
+     """
     def __init__(self, style_feats, vgg, decoder, alpha=1.0, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1):
         super().__init__()
         self.vgg = vgg
@@ -54,7 +69,7 @@ class NSTTransform(transforms.Transform):
         # effective_prob = (1.0 - self.alpha)
 
         if torch.rand(1).item() < self.probability:
-
+            org_x = x
             x = self.to_tensor(x)
             x = x.to(device).unsqueeze(0)
             x = self.upsample(x)
@@ -85,18 +100,6 @@ class NSTTransform(transforms.Transform):
         scaled_tensor = normalized_tensor * 255
         scaled_tensor = scaled_tensor.byte() # converts dtype to torch.uint8 between 0 and 255
         return scaled_tensor
-
-    def preload_style_images(self, num_style_img):
-        style_images = []
-        total_images = os.listdir(self.style_dir)
-        subset_imgs = total_images[0:num_style_img]
-        for file in subset_imgs:
-            img_path = os.path.join(self.style_dir, file)
-            img = Image.open(img_path)
-            tensor = self.to_tensor(img).unsqueeze(0)
-            tensor = self.upsample(tensor).to(device)
-            style_images.append(tensor)
-        return torch.cat(style_images, dim=0).to(device)
 
     @torch.no_grad()
     def style_transfer(self, vgg, decoder, content, style, alpha=1.0):
