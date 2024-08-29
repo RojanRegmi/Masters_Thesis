@@ -54,17 +54,17 @@ class NSTTransform(transforms.Transform):
         self.rand_max = rand_max
         self.to_pil_img = transforms.ToPILImage()
     
-    def randomize_alpha(self):
+    """def randomize_alpha(self):
 
         alpha_values = [round(x, 1) for x in torch.arange(self.rand_min, self.rand_max, 0.1).tolist()]
-        return random.choice(alpha_values)
+        return random.choice(alpha_values)"""
 
     @torch.no_grad()
     def __call__(self, x):
 
         
-        if self.randomize:
-            self.alpha = self.randomize_alpha()
+        #if self.randomize:
+        #    self.alpha = self.randomize_alpha()
 
         # effective_prob = (1.0 - self.alpha)
 
@@ -102,9 +102,15 @@ class NSTTransform(transforms.Transform):
         return scaled_tensor
 
     @torch.no_grad()
-    def style_transfer(self, vgg, decoder, content, style, alpha=1.0):
+    def style_transfer(self, vgg, decoder, content, style, alpha=self.alpha):
+
+        if self.randomize:
+            alpha = np.random.uniform(low=rand_min, high=rand_max)
+
         content_f = vgg(content)
         style_f = style
         feat = adaptive_instance_normalization(content_f, style_f)
+
         feat = feat * alpha + content_f * (1 - alpha)
+        
         return decoder(feat)
