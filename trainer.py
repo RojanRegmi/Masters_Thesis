@@ -23,6 +23,7 @@ import argparse
 
 from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
+import adaIN.net_mixup as net_mixup
 from resnet_wide import WideResNet_28_4
 from geo_trivialaugment import GeometricTrivialAugmentWide
 
@@ -82,12 +83,17 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device):
-    vgg = net.vgg
-    decoder = net.decoder
-    vgg.load_state_dict(torch.load(encoder_path))
-    vgg = nn.Sequential(*list(vgg.children())[:31])
-    decoder.load_state_dict(torch.load(decoder_path))
+def load_models(device, interpolate):
+
+    if interpolate:
+        vgg = net_mixup.network_E
+        decoder = net_mixup.network_D
+    else:
+        vgg = net.vgg
+        decoder = net.decoder
+        vgg.load_state_dict(torch.load(encoder_path))
+        vgg = nn.Sequential(*list(vgg.children())[:31])
+        decoder.load_state_dict(torch.load(decoder_path))
 
     vgg.to(device).eval()
     decoder.to(device).eval()
@@ -201,6 +207,7 @@ if __name__ == '__main__' :
     parser.add_argument('--randomize_alpha', type=bool, default=False, help='Make alpha random or fixed (default: False)')
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
+    parser.add_argument('--style_interpolation', type=bool, default=False, help='Use Style interpolated Model or not')
 
 
 
@@ -210,7 +217,7 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    vgg, decoder = load_models(device=device)
+    vgg, decoder = load_models(device=device, interpolate = args.style_interpolation)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
@@ -220,7 +227,6 @@ if __name__ == '__main__' :
     transform_train = transforms.Compose([
         nst_transfer,
         transforms.RandomHorizontalFlip(),
-        
         transforms.RandomCrop(32, padding=4),
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
