@@ -106,7 +106,7 @@ class NSTTransform(transforms.Transform):
     def style_transfer(self, vgg, decoder, content, style):
 
         if self.randomize:
-            alpha = np.random.uniform(low=rand_min, high=rand_max)
+            alpha = np.random.uniform(low=self.rand_min, high=self.rand_max)
         else:
             alpha = self.alpha
 
