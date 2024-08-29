@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 
 current_dir = os.path.dirname(__file__)
 module_path = os.path.abspath(current_dir)
