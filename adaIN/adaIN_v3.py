@@ -102,10 +102,12 @@ class NSTTransform(transforms.Transform):
         return scaled_tensor
 
     @torch.no_grad()
-    def style_transfer(self, vgg, decoder, content, style, alpha=self.alpha):
+    def style_transfer(self, vgg, decoder, content, style):
 
         if self.randomize:
             alpha = np.random.uniform(low=rand_min, high=rand_max)
+        else:
+            alpha = self.alpha
 
         content_f = vgg(content)
         style_f = style
