@@ -114,6 +114,6 @@ class NSTTransform(transforms.Transform):
         style_f = style
         feat = adaptive_instance_normalization(content_f, style_f)
 
-        feat = feat * alpha + content_f * (1 - alpha) + content_f
+        feat = feat * alpha + content_f * (1 - alpha) + content_f # change feats
         
         return decoder(feat)
