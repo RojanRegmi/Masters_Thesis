@@ -85,15 +85,11 @@ class CIFAR10(Dataset):
 
 def load_models(device, interpolate):
 
-    if interpolate:
-        vgg = net_mixup.network_E
-        decoder = net_mixup.network_D
-    else:
-        vgg = net.vgg
-        decoder = net.decoder
-        vgg.load_state_dict(torch.load(encoder_path))
-        vgg = nn.Sequential(*list(vgg.children())[:31])
-        decoder.load_state_dict(torch.load(decoder_path))
+    vgg = net.vgg
+    decoder = net.decoder
+    vgg.load_state_dict(torch.load(encoder_path))
+    vgg = nn.Sequential(*list(vgg.children())[:31])
+    decoder.load_state_dict(torch.load(decoder_path))
 
     vgg.to(device).eval()
     decoder.to(device).eval()
@@ -229,7 +225,7 @@ if __name__ == '__main__' :
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
         #GeometricTrivialAugmentWide(),  
-        #transforms.TrivialAugmentWide(),
+        transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
