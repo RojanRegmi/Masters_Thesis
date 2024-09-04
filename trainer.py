@@ -225,7 +225,7 @@ if __name__ == '__main__' :
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
         #GeometricTrivialAugmentWide(),  
-        transforms.TrivialAugmentWide(),
+        #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
