@@ -26,6 +26,7 @@ import adaIN.net as net
 import adaIN.net_mixup as net_mixup
 from resnet_wide import WideResNet_28_4
 from geo_trivialaugment import GeometricTrivialAugmentWide
+from utils import RandomChoiceTransforms
 
 import sys
 
@@ -218,12 +219,21 @@ if __name__ == '__main__' :
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
     nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
+
+    transform1 = nst_transfer
+    transform2 = TrivialAugmentWide()
+
+    transforms_list = [transform1, transform2]
+    probabilities = [0.5, 0.5]
+
+    random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
     
  
     transform_train = transforms.Compose([
-        nst_transfer,
+        #nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
+        random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
