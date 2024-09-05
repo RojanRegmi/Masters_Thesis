@@ -47,5 +47,5 @@ class RandomChoiceTransforms:
 
     def __call__(self, x):
 
-        choice = random.choice(self.transforms, self.p)[0]
+        choice = random.choices(self.transforms, weights=self.p)[0]
         return choice(x)
