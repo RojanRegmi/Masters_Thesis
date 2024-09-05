@@ -1,4 +1,5 @@
 import torchvision
+from torchvision.transforms.v2 import Transform
 from torchvision import transforms
 import torch
 from adaIN.net import vgg
@@ -37,7 +38,7 @@ def downsample_image(image, size=(32, 32)):
 
 class RandomChoiceTransforms:
 
-    def __init__(self, transforms: List[torchvision.transforms], p:List[float]):
+    def __init__(self, transforms: List[Transform], p:List[float]):
         assert len(transforms) == len(p), "The number of transforms and probabilities must match"
 
         self.transforms = transforms
