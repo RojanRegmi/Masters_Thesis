@@ -1,6 +1,9 @@
+import torchvision
 from torchvision import transforms
 import torch
 from adaIN.net import vgg
+
+from typing import List, Dict
 
 import os
 import sys
@@ -32,4 +35,15 @@ def downsample_image(image, size=(32, 32)):
 
     return downsampled_image
 
-def generate_style_feats()
+class RandomChoiceTransforms:
+
+    def __init__(self, transforms: List[torchvision.transforms], p:List[float]):
+        assert len(transforms) == len(p), "The number of transforms and probabilities must match"
+
+        self.transforms = transforms
+        self.p = p 
+
+    def __call__(self, x):
+
+        choice = random.choice(self.transforms, self.p)[0]
+        return choice(x)
