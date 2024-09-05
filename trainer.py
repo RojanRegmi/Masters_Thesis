@@ -221,7 +221,7 @@ if __name__ == '__main__' :
     nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
-    transform2 = TrivialAugmentWide()
+    transform2 = transforms.TrivialAugmentWide()
 
     transforms_list = [transform1, transform2]
     probabilities = [0.5, 0.5]
