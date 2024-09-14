@@ -151,7 +151,9 @@ def main():
     decoder = MobilenetDecoder().to(args.device)
 
     # Data loading
-    content_dataset = FlatFolderDataset(args.content_dir, train_transform())
+    #content_dataset = FlatFolderDataset(args.content_dir, train_transform())
+    # Load the CIFAR-10 training and test datasets
+    content_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
     style_dataset = FlatFolderDataset(args.style_dir, train_transform())
 
     content_loader = iter(data.DataLoader(content_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads))
