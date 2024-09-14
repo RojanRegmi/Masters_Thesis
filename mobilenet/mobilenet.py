@@ -9,6 +9,7 @@ class MobilenetEncoder(nn.Module):
         super(MobilenetEncoder, self).__init__()
         mobilenet = models.mobilenet_v2(pretrained=True)
         mobilenet.eval()
+
         for param in mobilenet.parameters():
             param.requires_grad = False
         
@@ -37,6 +38,14 @@ class MobilenetDecoder(nn.Module):
     def __init__(self, padding="reflect"):
         super(MobilenetDecoder, self).__init__()
         self.btnecks = nn.ModuleList()
+
+        # Define the number of channels for each bottleneck layer in the decoder
+        new_layers = {
+            32: 64,    # Example: Bottleneck layer with 32 input channels has 64 output channels
+            64: 128,   # Example: Bottleneck layer with 64 input channels has 128 output channels
+            128: 256,  # Example: Bottleneck layer with 128 input channels has 256 output channels
+            256: 512   # Example: Bottleneck layer with 256 input channels has 512 output channels
+        }
 
         n1 = new_layers[32]
         self.btnecks.append(self.create_btneck1(3, n1, padding_type=padding))
