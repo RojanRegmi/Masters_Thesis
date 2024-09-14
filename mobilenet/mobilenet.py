@@ -32,7 +32,6 @@ class MobilenetEncoder(nn.Module):
 
         # Define preprocessing using torchvision.transforms
         self.preprocess = transforms.Compose([
-            transforms.ToTensor(),  # Converts PIL Image to a PyTorch Tensor
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize with ImageNet stats
         ])
 
