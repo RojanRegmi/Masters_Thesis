@@ -79,7 +79,8 @@ def train(encoder, decoder, content_loader, style_loader, args):
 
     for i in range(args.max_iter):
         adjust_learning_rate(optimizer, i, args.lr, args.lr_decay)
-        content_images = next(iter(content_loader)).to(args.device)
+        content_images, _ = next(iter(content_loader))
+        content_images = content_images.to(args.device)
         style_images = next(iter(style_loader)).to(args.device)
 
         # Calculate loss
