@@ -2,20 +2,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
+from torchvision import models, transforms
 
-# MobileNet Encoder Definition
 class MobilenetEncoder(nn.Module):
     def __init__(self):
         super(MobilenetEncoder, self).__init__()
+        
+        # Load pre-trained MobileNetV2 model
         mobilenet = models.mobilenet_v2(pretrained=True)
         mobilenet.eval()
 
+        # Freeze all the parameters
         for param in mobilenet.parameters():
             param.requires_grad = False
         
-        self.btnecks = []
+        # Initialize bottleneck layers as a ModuleList
+        self.btnecks = nn.ModuleList()
 
-        # Indices corresponding to 'conv1_relu', 'conv_dw_2_relu', 'conv_dw_4_relu', 'conv_dw_6_relu'
+        # Indices corresponding to the layers: 'conv1_relu', 'conv_dw_2_relu', 'conv_dw_4_relu', 'conv_dw_6_relu'
         output_layer_indices = [2, 4, 7, 14]
         prev_index = 0
 
@@ -26,12 +30,19 @@ class MobilenetEncoder(nn.Module):
             self.btnecks.append(block)
             prev_index = idx + 1
 
-        # Define preprocessing
-        self.preprocess = lambda x: F.normalize(x * 255.0, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # Define preprocessing using torchvision.transforms
+        self.preprocess = transforms.Compose([
+            transforms.ToTensor(),  # Converts PIL Image to a PyTorch Tensor
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize with ImageNet stats
+        ])
 
     def forward(self, block, input_tensor):
+        # Apply preprocessing
         x = self.preprocess(input_tensor)
+        # Apply the specific block of layers
         return self.btnecks[block](x)
+
+
 
 # MobileNet Decoder Definition
 class MobilenetDecoder(nn.Module):
