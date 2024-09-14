@@ -5,7 +5,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.utils.data as data
 import torch.optim as optim
-from torchvision import transforms
+from torchvision import datasets, transforms
 from torchvision.utils import save_image
 from PIL import Image, ImageFile
 from mobilenet import MobilenetEncoder, MobilenetDecoder  # Import MobileNet encoder and decoder
