@@ -150,6 +150,9 @@ def main():
     encoder = MobilenetEncoder().to(args.device)
     decoder = MobilenetDecoder().to(args.device)
 
+    transform_train = transforms.Compose([ transforms.Resize((224, 224)),
+        transforms.ToTensor()])
+
     # Data loading
     #content_dataset = FlatFolderDataset(args.content_dir, train_transform())
     # Load the CIFAR-10 training and test datasets
