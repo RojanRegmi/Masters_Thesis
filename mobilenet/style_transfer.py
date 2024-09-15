@@ -69,7 +69,6 @@ def adjust_learning_rate(optimizer, iteration_count, lr, lr_decay):
         param_group['lr'] = new_lr
 
 
-# Training function
 def train(encoder, decoder, content_loader, style_loader, args):
     # Set models to training mode
     decoder.train()
@@ -77,11 +76,25 @@ def train(encoder, decoder, content_loader, style_loader, args):
 
     optimizer = optim.Adam(decoder.parameters(), lr=args.lr)
 
+    content_iter = iter(content_loader)
+    style_iter = iter(style_loader)
+
     for i in range(args.max_iter):
         adjust_learning_rate(optimizer, i, args.lr, args.lr_decay)
-        content_images, _ = next(iter(content_loader))
+
+        try:
+            content_images, _ = next(content_iter)
+        except StopIteration:
+            content_iter = iter(content_loader)
+            content_images, _ = next(content_iter)
         content_images = content_images.to(args.device)
-        style_images = next(iter(style_loader)).to(args.device)
+
+        try:
+            style_images = next(style_iter)
+        except StopIteration:
+            style_iter = iter(style_loader)
+            style_images = next(style_iter)
+        style_images = style_images.to(args.device)
 
         # Calculate loss
         loss, content_loss, style_loss = compute_loss(encoder, decoder, content_images, style_images, args)
@@ -96,33 +109,40 @@ def train(encoder, decoder, content_loader, style_loader, args):
             print(f"Iteration [{i + 1}/{args.max_iter}], Loss: {loss.item():.4f}, Content Loss: {content_loss.item():.4f}, Style Loss: {style_loss.item():.4f}")
             save_image(content_images, f"{args.save_dir}/content_{i + 1}.jpg")
             save_image(style_images, f"{args.save_dir}/style_{i + 1}.jpg")
-            save_image(decoder(3, adaptive_instance_normalization(encoder(3, content_images), encoder(3, style_images))), f"{args.save_dir}/output_{i + 1}.jpg")
+            output = decoder(t)
+            save_image(output, f"{args.save_dir}/output_{i + 1}.jpg")
+
 
 
 def compute_loss(encoder, decoder, content_image, style_image, args):
-    # Extract content and style features from the encoder
-    content_features = encoder(3, content_image)
-    style_features = encoder(3, style_image)
+    # Extract content and style features from the encoder at multiple layers
+    content_features = []
+    style_features = []
+    for i in range(len(encoder.btnecks)):
+        content_features.append(encoder(i, content_image))
+        style_features.append(encoder(i, style_image))
 
-    # Perform AdaIN
-    t = adaptive_instance_normalization(content_features, style_features)
+    # Perform AdaIN on the deepest layer
+    t = adaptive_instance_normalization(content_features[-1], style_features[-1])
 
-    # Reconstruct image
-    output = decoder(3, t)
+    # Reconstruct image through the decoder
+    output = decoder(t)
 
     # Compute content loss
-    output_content_features = encoder(3, output)
-    content_loss = nn.MSELoss()(output_content_features, content_features)
-    
-    # Compute style loss
-    output_style_features = encoder(3, output)
+    output_content_features = encoder(len(encoder.btnecks) - 1, output)
+    content_loss = nn.MSELoss()(output_content_features, content_features[-1])
+
+    # Compute style loss over multiple layers
     style_loss = 0
-    for of, sf in zip(output_style_features, style_features):
-        style_loss += nn.MSELoss()(calc_mean_std(of)[0], calc_mean_std(sf)[0]) + nn.MSELoss()(calc_mean_std(of)[1], calc_mean_std(sf)[1])
+    for of, sf in zip([encoder(i, output) for i in range(len(encoder.btnecks))], style_features):
+        of_mean, of_std = calc_mean_std(of)
+        sf_mean, sf_std = calc_mean_std(sf)
+        style_loss += nn.MSELoss()(of_mean, sf_mean) + nn.MSELoss()(of_std, sf_std)
 
     # Total loss
     loss = args.content_weight * content_loss + args.style_weight * style_loss
     return loss, content_loss, style_loss
+
 
 
 def main():
@@ -151,20 +171,26 @@ def main():
     encoder = MobilenetEncoder().to(args.device)
     decoder = MobilenetDecoder().to(args.device)
 
-    transform_train = transforms.Compose([ transforms.Resize((224, 224)),
-        transforms.ToTensor()])
+    transform_train = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomCrop(224),
+        transforms.ToTensor()
+    ])
 
     # Data loading
-    #content_dataset = FlatFolderDataset(args.content_dir, train_transform())
-    # Load the CIFAR-10 training and test datasets
     content_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-    style_dataset = FlatFolderDataset(args.style_dir, train_transform())
+    style_dataset = FlatFolderDataset(args.style_dir, transform_train)
 
-    content_loader = iter(data.DataLoader(content_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads))
-    style_loader = iter(data.DataLoader(style_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads))
+    content_loader = data.DataLoader(content_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads)
+    style_loader = data.DataLoader(style_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads)
+
+    # Adjust content_loader to ignore labels
+    content_loader = ((images.to(args.device)) for images, _ in content_loader)
+    style_loader = ((images.to(args.device)) for images in style_loader)
 
     # Train the model
     train(encoder, decoder, content_loader, style_loader, args)
+
 
 
 if __name__ == '__main__':

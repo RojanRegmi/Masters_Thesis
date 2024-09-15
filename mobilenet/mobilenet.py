@@ -71,9 +71,9 @@ class MobilenetDecoder(nn.Module):
 
     def create_btneck1(self, in_channels, out_channels, padding_type='reflect'):
         layers = nn.Sequential(
-            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),  
-            nn.ReflectionPad2d(1),  
-            nn.Conv2d(out_channels, in_channels, kernel_size=3, padding=0),  
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=0),
         )
         return layers
 
@@ -97,3 +97,9 @@ class MobilenetDecoder(nn.Module):
         bt_out = self.btnecks[block](input_tensor)
 
         return bt_out
+
+ def forward(self, input_tensor):
+        x = input_tensor
+        for block in reversed(self.btnecks):
+            x = block(x)
+        return x
