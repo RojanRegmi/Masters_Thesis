@@ -51,10 +51,10 @@ class MobilenetDecoder(nn.Module):
 
         # Define the number of channels for each bottleneck layer in the decoder
         new_layers = {
-            32: 64,    # Example: Bottleneck layer with 32 input channels has 64 output channels
-            64: 128,   # Example: Bottleneck layer with 64 input channels has 128 output channels
-            128: 256,  # Example: Bottleneck layer with 128 input channels has 256 output channels
-            256: 512   # Example: Bottleneck layer with 256 input channels has 512 output channels
+            32: 64,
+            64: 128,
+            128: 256,  
+            256: 512 
         }
 
         n1 = new_layers[32]
@@ -89,17 +89,10 @@ class MobilenetDecoder(nn.Module):
         )
         return layers
 
-    def forward(self, block, input_tensor, skip=None):
-        if skip is not None:
-            skip_resized = F.interpolate(skip, size=(input_tensor.shape[2] * 2, input_tensor.shape[3] * 2), mode='bilinear', align_corners=True)
-            input_tensor = input_tensor + skip_resized  
-
-        bt_out = self.btnecks[block](input_tensor)
-
-        return bt_out
-
- def forward(self, input_tensor):
+    def forward(self, input_tensor):
         x = input_tensor
         for block in reversed(self.btnecks):
             x = block(x)
         return x
+
+ 
