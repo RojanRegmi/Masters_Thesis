@@ -84,9 +84,11 @@ def train(encoder, decoder, content_loader, style_loader, args):
 
         try:
             content_images, _ = next(content_iter)
+            
         except StopIteration:
             content_iter = iter(content_loader)
             content_images, _ = next(content_iter)
+            
         content_images = content_images.to(args.device)
 
         try:
@@ -183,10 +185,6 @@ def main():
 
     content_loader = data.DataLoader(content_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads)
     style_loader = data.DataLoader(style_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.n_threads)
-
-    # Adjust content_loader to ignore labels
-    content_loader = ((images.to(args.device)) for images, _ in content_loader)
-    style_loader = ((images.to(args.device)) for images in style_loader)
 
     # Train the model
     train(encoder, decoder, content_loader, style_loader, args)
