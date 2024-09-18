@@ -56,7 +56,6 @@ class FlatFolderDataset(data.Dataset):
 def train_transform():
     transform_list = [
         transforms.Resize((224, 224)),
-        transforms.RandomCrop(224),
         transforms.ToTensor()
     ]
     return transforms.Compose(transform_list)
