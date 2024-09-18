@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torchvision.models as models
+from torchvision.models import MobileNet_V2_Weights
 
 from function import adaptive_instance_normalization as adain
 from function import calc_mean_std
