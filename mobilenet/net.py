@@ -31,7 +31,7 @@ decoder = nn.Sequential(
 )
 
 # Load MobileNetV2 and extract features
-mobilenet_v2 = models.mobilenet_v2(pretrained=True)
+mobilenet_v2 = models.mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
 encoder = mobilenet_v2.features
 
 # Define the Net class with the MobileNetV2 encoder
