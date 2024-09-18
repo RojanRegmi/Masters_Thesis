@@ -6,7 +6,7 @@ import torch.backends.cudnn as cudnn
 import torch.utils.data as data
 from PIL import Image, ImageFile
 from tensorboardX import SummaryWriter
-from torchvision import transforms
+from torchvision import transforms, datasets
 from tqdm import tqdm
 
 import net
@@ -82,7 +82,7 @@ network.to(device)
 content_tf = train_transform()
 style_tf = train_transform()
 
-content_dataset = FlatFolderDataset(args.content_dir, content_tf)
+content_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
 style_dataset = FlatFolderDataset(args.style_dir, style_tf)
 
 content_iter = iter(data.DataLoader(
