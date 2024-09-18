@@ -82,7 +82,7 @@ network.to(device)
 content_tf = train_transform()
 style_tf = train_transform()
 
-content_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
+content_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform())
 style_dataset = FlatFolderDataset(args.style_dir, style_tf)
 
 content_iter = iter(data.DataLoader(
