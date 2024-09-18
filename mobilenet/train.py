@@ -27,7 +27,7 @@ class FlatFolderDataset(data.Dataset):
     def __init__(self, root, transform):
         super(FlatFolderDataset, self).__init__()
         self.root = root
-        self.paths = list(Path(self.root).glob('*'))
+        self.paths = list(Path(self.root).rglob('*.jpg')) + list(Path(self.root).rglob('*.png'))
         self.transform = transform
 
     def __getitem__(self, index):
