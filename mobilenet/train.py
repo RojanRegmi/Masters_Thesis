@@ -83,7 +83,7 @@ content_tf = train_transform()
 style_tf = train_transform()
 
 #content_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform())
-content_dataset = datasets.Flickr8k(root="./data", split="train", transform=train_transform(), download=True)
+content_dataset = datasets.Imagenette(root="./data", download=True, transform=train_transform())
 style_dataset = FlatFolderDataset(args.style_dir, style_tf)
 
 content_iter = iter(data.DataLoader(
