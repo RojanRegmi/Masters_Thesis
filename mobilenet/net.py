@@ -5,8 +5,45 @@ from torchvision.models import MobileNet_V2_Weights
 from function import adaptive_instance_normalization as adain
 from function import calc_mean_std
 
-# Define the decoder (adjust input channels to match encoder output)
 decoder = nn.Sequential(
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(96, 128, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+        
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(128, 128, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(128, 64, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+        
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(64, 64, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(64, 32, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+        
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(32, 32, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(32, 16, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+        
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(16, 16, (3, 3)),
+        nn.ReLU(inplace=True),
+        nn.ReflectionPad2d((1, 1, 1, 1)),
+        nn.Conv2d(16, 3, (3, 3))
+        )
+
+# Define the decoder (adjust input channels to match encoder output)
+"""decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(320, 256, (3, 3)),  # Adjusted input channels from 512 to 320
     nn.ReLU(),
@@ -29,7 +66,7 @@ decoder = nn.Sequential(
     nn.Upsample(scale_factor=2, mode='nearest'),
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(64, 3, (3, 3)),
-)
+)"""
 
 # Load MobileNetV2 and extract features
 mobilenet_v2 = models.mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
@@ -41,10 +78,10 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.enc_layers = list(encoder.children())
         # Define encoder stages corresponding to different layers
-        self.enc_1 = nn.Sequential(*self.enc_layers[:3])
-        self.enc_2 = nn.Sequential(*self.enc_layers[3:6])
-        self.enc_3 = nn.Sequential(*self.enc_layers[6:13])
-        self.enc_4 = nn.Sequential(*self.enc_layers[13:18])
+        self.enc_1 = nn.Sequential(*self.enc_layers[:2])
+        self.enc_2 = nn.Sequential(*self.enc_layers[2:4])  
+        self.enc_3 = nn.Sequential(*self.enc_layers[4:7])  
+        self.enc_4 = nn.Sequential(*self.enc_layers[7:14])
 
         self.decoder = decoder
         self.mse_loss = nn.MSELoss()
