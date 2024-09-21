@@ -80,10 +80,10 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.enc_layers = list(encoder.children())
         # Define encoder stages corresponding to different layers
-        self.enc_1 = nn.Sequential(self.enc_layers[:3])
-        self.enc_2 = nn.Sequential(self.enc_layers[3:6])
-        self.enc_3 = nn.Sequential(self.enc_layers[6:10])
-        self.enc_4 = nn.Sequential(self.enc_layers[10:18])
+        self.enc_1 = nn.Sequential(*self.enc_layers[:3])
+        self.enc_2 = nn.Sequential(*self.enc_layers[3:6])
+        self.enc_3 = nn.Sequential(*self.enc_layers[6:10])
+        self.enc_4 = nn.Sequential(*self.enc_layers[10:18])
 
         self.decoder = decoder
         self.mse_loss = nn.MSELoss()
