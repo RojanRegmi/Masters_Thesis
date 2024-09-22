@@ -5,6 +5,7 @@ from torchvision.models import MobileNet_V2_Weights
 from function import adaptive_instance_normalization as adain
 from function import calc_mean_std
 
+"""
 decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(96, 256, (3, 3)),  # Adjust input channels from 64 to 96 (output of 10th layer)
@@ -46,7 +47,7 @@ decoder = nn.Sequential(
     nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H, W)
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(64, 3, (3, 3)),  # Final output, 3 channels (RGB)
-)"""
+)
 
 
 # Load MobileNetV2 and extract features
