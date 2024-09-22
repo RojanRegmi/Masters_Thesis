@@ -132,10 +132,13 @@ class Net(nn.Module):
         t = alpha * t + (1 - alpha) * content_feats[2]
         print(f"AdaIN transferred t shape {t.shape}")
         print(f"Content Feats shape {content_feats[2].shape}")
+        
 
         # Pass through the decoder
         g_t = self.decoder(t)
         g_t_feats = self.encode_with_intermediate(g_t)
+        print(f"Decoded Content Feats shape {g_t_feats[2].shape}")
+
 
         # Calculate content loss on InvertedResidual Block #4
         loss_c = self.calc_content_loss(g_t_feats[2], t)
