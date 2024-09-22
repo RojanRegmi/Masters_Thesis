@@ -43,11 +43,9 @@ from function import calc_mean_std
         nn.Conv2d(16, 3, (3, 3))
         )"""
 
-# Define the decoder (adjust input channels to match encoder output)
 decoder = nn.Sequential(
-    # decoder to use MobileNetV2 until 18th layer
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(320, 256, (3, 3)),  # Adjusted input channels from 512 to 320
+    nn.Conv2d(64, 256, (3, 3)),
     nn.ReLU(),
     nn.Upsample(scale_factor=2, mode='nearest'),
     nn.ReflectionPad2d((1, 1, 1, 1)),
@@ -69,6 +67,7 @@ decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(64, 3, (3, 3)),
 )
+
 
 # Load MobileNetV2 and extract features
 mobilenet_v2 = models.mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
