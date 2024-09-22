@@ -126,15 +126,23 @@ class Net(nn.Module):
 
     def forward(self, content, style, alpha=1.0):
         style_feats = self.encode_with_intermediate(style)
-        content_feat = self.encode(content)
-        t = adain(content_feat, style_feats[-1])
-        t = alpha * t + (1 - alpha) * content_feat
+        content_feats = self.encode_with_intermediate(content)
 
+        # Perform AdaIN on content features (using content feature from InvertedResidual Block #4)
+        t = adain(content_feats[2], style_feats[2])  # AdaIN applied to the content feature layer (Block #4)
+        t = alpha * t + (1 - alpha) * content_feats[2]
+
+        # Pass through the decoder
         g_t = self.decoder(t)
         g_t_feats = self.encode_with_intermediate(g_t)
 
-        loss_c = self.calc_content_loss(g_t_feats[-1], t)
-        loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])
-        for i in range(1, 4):
-            loss_s += self.calc_style_loss(g_t_feats[i], style_feats[i])
+        # Calculate content loss on InvertedResidual Block #4
+        loss_c = self.calc_content_loss(g_t_feats[2], t)
+
+        # Calculate style loss from InvertedResidual Block #1, #2, #4, #7, and #14
+        loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])  # Style from Block #1
+        loss_s += self.calc_style_loss(g_t_feats[1], style_feats[1])  # Style from Block #2
+        loss_s += self.calc_style_loss(g_t_feats[2], style_feats[2])  # Style from Block #4
+        loss_s += self.calc_style_loss(g_t_feats[3], style_feats[3])  # Style from Block #7 and #14
+
         return loss_c, loss_s
