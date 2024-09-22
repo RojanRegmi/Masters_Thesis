@@ -130,8 +130,8 @@ class Net(nn.Module):
         # Perform AdaIN on content features (using content feature from InvertedResidual Block #4)
         t = adain(content_feats[2], style_feats[2])  # AdaIN applied to the content feature layer (Block #4)
         t = alpha * t + (1 - alpha) * content_feats[2]
-        print(t.shape)
-        print(content_feats[2].shape)
+        print(f"AdaIN transferred t shape {t.shape}")
+        print(f"Content Feats shape {content_feats[2].shape}")
 
         # Pass through the decoder
         g_t = self.decoder(t)
