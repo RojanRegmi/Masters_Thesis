@@ -109,15 +109,15 @@ class Net(nn.Module):
         content_feats = self.encode_with_intermediate(content)
 
         # Perform AdaIN on content features (using content feature from InvertedResidual Block #4)
-        t = adain(content_feats[-1], style_feats[-1])  # AdaIN applied to the content feature layer (Block #4)
-        t = alpha * t + (1 - alpha) * content_feats[-1]
+        t = adain(content_feats[1], style_feats[1])  # AdaIN applied to the content feature layer (Block #4)
+        t = alpha * t + (1 - alpha) * content_feats[1]
         
         # Pass through the decoder
         g_t = self.decoder(t)
         g_t_feats = self.encode_with_intermediate(g_t)
 
         # Calculate content loss on InvertedResidual Block #4
-        loss_c = self.calc_content_loss(g_t_feats[3], t)
+        loss_c = self.calc_content_loss(g_t_feats[1], t)
 
         # Calculate style loss from InvertedResidual Block #1, #2, #4, #7, and #14
         loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])  # Style from Block #1
