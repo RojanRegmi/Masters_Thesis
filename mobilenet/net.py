@@ -30,24 +30,20 @@ decoder = nn.Sequential(
 
 decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(64, 256, (3, 3)),  # Adjusted input channels from 320/160 to 64 (enc_3 output)
-    nn.ReLU(),
-    nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H/8, W/8)
-    nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(256, 256, (3, 3)),
-    nn.ReLU(),
-    nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H/4, W/4)
-    nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(256, 128, (3, 3)),
+    nn.Conv2d(24, 256, (3, 3)),  # Adjust input channels from 64 to 24 (output from 4th Inverted Residual Block)
     nn.ReLU(),
     nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H/2, W/2)
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(128, 64, (3, 3)),
+    nn.Conv2d(256, 128, (3, 3)),
     nn.ReLU(),
     nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H, W)
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(64, 3, (3, 3)),  # Final output, 3 channels (RGB)
+    nn.Conv2d(128, 64, (3, 3)),
+    nn.ReLU(),
+    nn.ReflectionPad2d((1, 1, 1, 1)),
+    nn.Conv2d(64, 3, (3, 3)),  # Output 3-channel RGB image
 )
+
 
 
 # Load MobileNetV2 and extract features
