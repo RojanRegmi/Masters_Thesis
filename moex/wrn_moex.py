@@ -13,20 +13,30 @@ def pono(x, epsilon=1e-5):
     normalized = (x - mean) / std
     return normalized, mean, std
 
-# Moment Exchange (MoEx) function for Instance Normalization
-def moex_instance_norm(x, swap_index, epsilon=1e-5):
-    B, C, H, W = x.shape
-    mean = x.mean(dim=[2, 3], keepdim=True)
-    std = x.var(dim=[2, 3], keepdim=True).add(epsilon).sqrt()
+def calc_mean_std(feat, eps=1e-5):
+    """
+    Calculate mean and standard deviation for each channel in the feature map.
+    """
+    N, C = feat.size()[:2]
+    feat_var = feat.view(N, C, -1).var(dim=2) + eps
+    feat_std = feat_var.sqrt().view(N, C, 1, 1)
+    feat_mean = feat.view(N, C, -1).mean(dim=2).view(N, C, 1, 1)
+    return feat_mean, feat_std
 
-    swap_mean = mean[swap_index]
-    swap_std = std[swap_index]
+def moex_instance_norm(content_feat, style_feat, epsilon=1e-5):
+    """
+    Perform Instance Normalization by normalizing content_feat and applying the style_feat's mean and std.
+    """
+    # Compute mean and std for content and style features
+    content_mean, content_std = calc_mean_std(content_feat, epsilon)
+    style_mean, style_std = calc_mean_std(style_feat, epsilon)
 
-    scale = swap_std / std
-    shift = swap_mean - mean * scale
-    output = x * scale + shift
+    # Normalize content feature and apply style moments
+    normalized_content = (content_feat - content_mean) / content_std
+    output = normalized_content * style_std + style_mean
 
     return output
+
 
 # Basic block for Wide ResNet
 class WideBasic(nn.Module):
@@ -81,12 +91,12 @@ class WideResNetWithPoNoAndIN(nn.Module):
     def forward(self, x, image2=None, swap_index=None, moex_type='pono'):
         # Forward pass for image1
         out1 = self.conv1(x)
-        out1 = self.layer1(out1)
+        
 
         # Apply PoNo (Positional Normalization) MoEx after the first layer
         if image2 is not None and moex_type == 'pono':
             out2 = self.conv1(image2)
-            out2 = self.layer1(out2)
+            out2 = self.conv1(out2)
 
             # Apply PoNo normalization
             out1, mean1, std1 = pono(out1)
@@ -95,17 +105,17 @@ class WideResNetWithPoNoAndIN(nn.Module):
             # Exchange moments between the two images
             out1 = out1 * std2 + mean2
             out2 = out2 * std1 + mean1
+        else:
+            out1 = self.layer1(out1)
 
         # Apply Instance Normalization MoEx right before the second stage (layer2)
         if image2 is not None and moex_type == 'in':
-            # Generate swap index
-            if swap_index is None:
-                batch_size = x.size(0)
-                swap_index = torch.randperm(batch_size)
+            # Forward pass for style image (image2)
+            out2 = self.conv1(image2)
+            out2 = self.layer1(out2)
 
-            # Apply IN-based MoEx
-            out1 = moex_instance_norm(out1, swap_index)
-            out2 = moex_instance_norm(out2, swap_index)
+            # Apply MoEx (instance normalization on content image with style moments)
+            out1 = moex_instance_norm(out1, out2)
 
         # Continue forward pass for the main image (out1)
         out1 = self.layer2(out1)
