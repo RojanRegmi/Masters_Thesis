@@ -118,7 +118,7 @@ class Net(nn.Module):
         # Calculate style loss from InvertedResidual Block #1, #2, #4, #7, and #14
         loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])  # Style from Block #1
         loss_s += self.calc_style_loss(g_t_feats[1], style_feats[1])  # Style from Block #2
-        loss_s += self.calc_style_loss(g_t_feats[2], style_feats[2])  # Style from Block #4
+        #loss_s += self.calc_style_loss(g_t_feats[2], style_feats[2])  # Style from Block #4
         #loss_s += self.calc_style_loss(g_t_feats[3], style_feats[3])  # Style from Block #7 and #14
 
         return loss_c, loss_s
