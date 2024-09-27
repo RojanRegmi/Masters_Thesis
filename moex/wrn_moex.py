@@ -96,7 +96,6 @@ class WideResNetWithPoNoAndIN(nn.Module):
         # Apply PoNo (Positional Normalization) MoEx after the first layer
         if image2 is not None and moex_type == 'pono':
             out2 = self.conv1(image2)
-            out2 = self.conv1(out2)
 
             # Apply PoNo normalization
             out1, mean1, std1 = pono(out1)
@@ -105,9 +104,8 @@ class WideResNetWithPoNoAndIN(nn.Module):
             # Exchange moments between the two images
             out1 = out1 * std2 + mean2
             out2 = out2 * std1 + mean1
-        else:
-            out1 = self.layer1(out1)
 
+        out1 = self.layer1(out1)
         out1 = self.layer2(out1)
 
         # Apply Instance Normalization MoEx right after the second stage (layer2)
