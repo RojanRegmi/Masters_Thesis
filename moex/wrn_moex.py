@@ -75,7 +75,7 @@ class WideResNetWithPoNoAndIN(nn.Module):
         
         # Residual layers for 3-stage architecture
         self.layer1 = self._wide_layer(block, nStages[1], n, dropout_rate, stride=factor)  # First stage
-        self.layer2 = self._wide_layer(block, nStages[2], n, dropout_rate, stride=2)  # Second stage (IN MoEx applied before this)
+        self.layer2 = self._wide_layer(block, nStages[2], n, dropout_rate, stride=2)  # Second stage
         self.layer3 = self._wide_layer(block, nStages[3], n, dropout_rate, stride=2)  # Third stage
         self.bn1 = nn.BatchNorm2d(nStages[3], momentum=0.9)
         self.linear = nn.Linear(nStages[3], num_classes)
