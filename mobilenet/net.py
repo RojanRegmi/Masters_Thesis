@@ -58,7 +58,7 @@ class Net(nn.Module):
         self.enc_layers = list(encoder.children())
         # Define encoder stages corresponding to different layers
         self.enc_1 = nn.Sequential(*self.enc_layers[:2])
-        self.enc_2 = nn.Sequential(*self.enc_layers[2])
+        self.enc_2 = nn.Sequential(self.enc_layers[2])
         self.enc_3 = nn.Sequential(*self.enc_layers[3:5])
         self.enc_4 = nn.Sequential(*self.enc_layers[5:8])
         self.enc_5 = nn.Sequential(*self.enc_layers[8:15])
