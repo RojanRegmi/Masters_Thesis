@@ -5,32 +5,28 @@ from torchvision.models import MobileNet_V2_Weights
 from function import adaptive_instance_normalization as adain
 from function import calc_mean_std
 
-"""
 decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(96, 256, (3, 3)),  # Adjust input channels from 64 to 96 (output of 10th layer)
+    nn.Conv2d(32, 256, (3, 3)), 
     nn.ReLU(),
-    nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H/4, W/4)
-    nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(256, 256, (3, 3)),
-    nn.ReLU(),
-    nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H/2, W/2)
+    nn.Upsample(scale_factor=2, mode='nearest'),
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(256, 128, (3, 3)),
     nn.ReLU(),
-    nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H, W) (original image size)
+    nn.Upsample(scale_factor=2, mode='nearest'),
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(128, 64, (3, 3)),
     nn.ReLU(),
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(64, 3, (3, 3)),  # Output final 3-channel RGB image
+    nn.Conv2d(64, 3, (3, 3)),  # Output 3-channel RGB image
 )
+
 
 """
 
 decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
-    nn.Conv2d(24, 256, (3, 3)),  # Adjust input channels from 64 to 24 (output from 4th Inverted Residual Block)
+    nn.Conv2d(24, 256, (3, 3)),
     nn.ReLU(),
     nn.Upsample(scale_factor=2, mode='nearest'),  # Upsample to (H/2, W/2)
     nn.ReflectionPad2d((1, 1, 1, 1)),
@@ -42,7 +38,7 @@ decoder = nn.Sequential(
     nn.ReLU(),
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(64, 3, (3, 3)),  # Output 3-channel RGB image
-)
+)"""
 
 
 
