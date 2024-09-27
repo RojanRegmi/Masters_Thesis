@@ -17,7 +17,7 @@ decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(128, 64, (3, 3)),
     nn.ReLU(),
-    nn.Upsample(scale_factor=2, mode='nearest')
+    nn.Upsample(scale_factor=2, mode='nearest'),
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(64, 3, (3, 3)),  # Output 3-channel RGB image
 )
