@@ -58,9 +58,10 @@ class Net(nn.Module):
         self.enc_layers = list(encoder.children())
         # Define encoder stages corresponding to different layers
         self.enc_1 = nn.Sequential(*self.enc_layers[:2])
-        self.enc_2 = nn.Sequential(*self.enc_layers[2:4])
-        self.enc_3 = nn.Sequential(*self.enc_layers[4:7])
-        self.enc_4 = nn.Sequential(*self.enc_layers[7:14])
+        self.enc_2 = nn.Sequential(*self.enc_layers[2])
+        self.enc_3 = nn.Sequential(*self.enc_layers[3:5])
+        self.enc_4 = nn.Sequential(*self.enc_layers[5:8])
+        self.enc_5 = nn.Sequential(*self.enc_layers[8:15])
 
         self.decoder = decoder
         self.mse_loss = nn.MSELoss()
@@ -70,7 +71,7 @@ class Net(nn.Module):
             for param in getattr(self, name).parameters():
                 param.requires_grad = False
 
-    def encode_with_intermediate(self, input):
+     def encode_with_intermediate(self, input):
         results = []
         x = input
         x = self.enc_1(x)
@@ -81,6 +82,8 @@ class Net(nn.Module):
         results.append(x)
         x = self.enc_4(x)
         results.append(x)
+        x = self.enc_5(x)
+        results.append(x)
         return results
 
     def encode(self, input):
@@ -89,6 +92,7 @@ class Net(nn.Module):
         x = self.enc_2(x)
         x = self.enc_3(x)
         x = self.enc_4(x)
+        x = self.enc_5(x)
         return x
 
     def calc_content_loss(self, input, target):
@@ -105,19 +109,20 @@ class Net(nn.Module):
         content_feats = self.encode_with_intermediate(content)
 
         # Perform AdaIN on content features (using content feature from InvertedResidual Block #4)
-        t = adain(content_feats[1], style_feats[1])  # AdaIN applied to the content feature layer (Block #4)
-        t = alpha * t + (1 - alpha) * content_feats[1]
+        t = adain(content_feats[2], style_feats[2])  # AdaIN applied to the content feature layer (Block #4)
+        t = alpha * t + (1 - alpha) * content_feats[2]
         
         # Pass through the decoder
         g_t = self.decoder(t)
         g_t_feats = self.encode_with_intermediate(g_t)
 
         # Calculate content loss on InvertedResidual Block #4
-        loss_c = self.calc_content_loss(g_t_feats[1], t)
+        loss_c = self.calc_content_loss(g_t_feats[2], t)
 
         # Calculate style loss from InvertedResidual Block #1, #2, #4, #7, and #14
-        loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])  # Style from Block #1
-        loss_s += self.calc_style_loss(g_t_feats[1], style_feats[1])  # Style from Block #2
+        loss_s = sum(self.calc_style_loss(g_t_feats[i], style_feats[i]) for i in range(len(style_feats)))
+        #loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])  # Style from Block #1
+        #loss_s += self.calc_style_loss(g_t_feats[1], style_feats[1])  # Style from Block #2
         #loss_s += self.calc_style_loss(g_t_feats[2], style_feats[2])  # Style from Block #4
         #loss_s += self.calc_style_loss(g_t_feats[3], style_feats[3])  # Style from Block #7 and #14
 
