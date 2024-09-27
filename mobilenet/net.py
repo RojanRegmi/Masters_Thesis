@@ -71,7 +71,7 @@ class Net(nn.Module):
             for param in getattr(self, name).parameters():
                 param.requires_grad = False
 
-     def encode_with_intermediate(self, input):
+    def encode_with_intermediate(self, input):
         results = []
         x = input
         x = self.enc_1(x)
