@@ -17,6 +17,7 @@ decoder = nn.Sequential(
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(128, 64, (3, 3)),
     nn.ReLU(),
+    nn.Upsample(scale_factor=2, mode='nearest')
     nn.ReflectionPad2d((1, 1, 1, 1)),
     nn.Conv2d(64, 3, (3, 3)),  # Output 3-channel RGB image
 )
@@ -104,15 +105,15 @@ class Net(nn.Module):
         style_feats = self.encode_with_intermediate(style)
         content_feats = self.encode_with_intermediate(content)
 
-        # Perform AdaIN on content features (using content feature from InvertedResidual Block #4)
-        t = adain(content_feats[2], style_feats[2])  # AdaIN applied to the content feature layer (Block #4)
+        # Perform AdaIN on content features (using content feature from InvertedResidual Block #5)
+        t = adain(content_feats[2], style_feats[2])  # AdaIN applied to the content feature layer (Block #5)
         t = alpha * t + (1 - alpha) * content_feats[2]
         
         # Pass through the decoder
         g_t = self.decoder(t)
         g_t_feats = self.encode_with_intermediate(g_t)
 
-        # Calculate content loss on InvertedResidual Block #4
+        # Calculate content loss on InvertedResidual Block #5
         loss_c = self.calc_content_loss(g_t_feats[2], t)
 
         # Calculate style loss from InvertedResidual Block #1, #2, #4, #7, and #14
