@@ -264,7 +264,7 @@ if __name__ == '__main__' :
 
     elif args.dataset == 'cifar100':
         trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
-        testset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
+        testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
         net = WideResNet_28_4(num_classes=100)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
