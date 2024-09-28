@@ -1,4 +1,5 @@
 import torch
+import torchvision
 import torch.multiprocessing as mp
 import torchvision.transforms as transforms
 from torch.optim.lr_scheduler import StepLR
@@ -205,7 +206,7 @@ if __name__ == '__main__' :
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
     parser.add_argument('--style_interpolation', type=bool, default=False, help='Use Style interpolated Model or not')
-    parser.add_argument('--dataset', type=str, default='cifar10', help='CIFAR10 or CIFAR100')
+    parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
 
 
 
