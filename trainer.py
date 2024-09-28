@@ -260,10 +260,12 @@ if __name__ == '__main__' :
     if args.dataset == 'cifar10':
         trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
         testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+        net = WideResNet_28_4(num_classes=10)
 
     elif args.dataset == 'cifar100':
         trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
         testset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
+        net = WideResNet_28_4(num_classes=100)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
@@ -272,7 +274,8 @@ if __name__ == '__main__' :
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
     
-    net = WideResNet_28_4(num_classes=10)
+
+    #net = WideResNet_28_4(num_classes=100)
     net.to(device)
 
     trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
