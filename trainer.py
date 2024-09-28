@@ -205,6 +205,7 @@ if __name__ == '__main__' :
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
     parser.add_argument('--style_interpolation', type=bool, default=False, help='Use Style interpolated Model or not')
+    parser.add_argument('--dataset', type=str, default='cifar10', help='CIFAR10 or CIFAR100')
 
 
 
@@ -254,11 +255,19 @@ if __name__ == '__main__' :
     batch_size = args.batch_size
 
     cifar_10_dir = args.content_dir
-    trainset = CIFAR10(data_dir=cifar_10_dir, transform=transform_train)
+
+    if args.dataset == 'cifar10':
+        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
+        testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+
+    elif args.dataset == 'cifar100':
+        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
+        testset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
+
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
 
-    testset = CIFAR10(data_dir=cifar_10_dir, train=False, transform=transform_test)
+    #testset = torchvision.datasets.CIFAR100(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
     
