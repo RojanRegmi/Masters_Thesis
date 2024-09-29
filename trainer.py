@@ -232,7 +232,7 @@ if __name__ == '__main__' :
     
  
     transform_train = transforms.Compose([
-        nst_transfer,
+        #nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
         #random_choice_transform,
