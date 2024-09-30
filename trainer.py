@@ -226,7 +226,7 @@ if __name__ == '__main__' :
     transform2 = transforms.TrivialAugmentWide()
 
     transforms_list = [transform1, transform2]
-    probabilities = [0.5, 0.5]
+    probabilities = [0.3, 0.7]
 
     random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
     
