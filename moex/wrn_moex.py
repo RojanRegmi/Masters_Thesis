@@ -106,7 +106,8 @@ class WideResNetWithPoNoAndIN(nn.Module):
             out2 = out2 * std1 + mean1
 
         out1 = self.layer1(out1)
-        out1 = self.layer2(out1)
+        out1 = self.layer2(out1) 
+        out1 = self.layer3(out1)
 
         # Apply Instance Normalization MoEx right after the second stage (layer2)
         if image2 is not None and moex_type == 'in':
@@ -114,13 +115,12 @@ class WideResNetWithPoNoAndIN(nn.Module):
             out2 = self.conv1(image2)
             out2 = self.layer1(out2)
             out2 = self.layer2(out2)
+            out3 = self.layer3(out3)
 
             # Apply MoEx (instance normalization on content image with style moments)
             out1 = moex_instance_norm(out1, out2)
 
-        # Continue forward pass for the main image (out1)
         
-        out1 = self.layer3(out1)
         out1 = F.relu(self.bn1(out1))
         out1 = F.avg_pool2d(out1, 8)
         out1 = out1.view(out1.size(0), -1)
