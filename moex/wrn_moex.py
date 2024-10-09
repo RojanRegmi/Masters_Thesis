@@ -115,7 +115,7 @@ class WideResNetWithPoNoAndIN(nn.Module):
             out2 = self.conv1(image2)
             out2 = self.layer1(out2)
             out2 = self.layer2(out2)
-            out3 = self.layer3(out3)
+            out2 = self.layer3(out2)
 
             # Apply MoEx (instance normalization on content image with style moments)
             out1 = moex_instance_norm(out1, out2)
