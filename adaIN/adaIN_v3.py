@@ -37,6 +37,8 @@ class NSTTransform(transforms.Transform):
     randomize = randomly selected strength of alpha from a given range
     rand_min = Minimum value of alpha if randomized
     rand_max = Maximum value of alpha if randomized
+    upsample = Upsamples the image to a size of 224 x 224
+    downsample = Downsamples the image back to 32 x 32. This is specific for CIFAR. Should be downsampled according to dataset.
 
      """
     def __init__(self, style_feats, vgg, decoder, alpha=1.0, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1):
