@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 
 def calc_mean_std(feat, eps=1e-5):
@@ -65,3 +66,25 @@ def coral(source, target):
                         target_f_mean.expand_as(source_f_norm)
 
     return source_f_transfer.view(source.size())
+
+def remove_batchnorm(model):
+    # Define an empty container to store the new layers
+    new_layers = []
+
+    # Iterate through the layers of the model
+    for layer in model.model.children():
+        if isinstance(layer, nn.Sequential):
+            # Handle Sequential layers: go through each layer inside
+            new_seq_layers = []
+            for sub_layer in layer.children():
+                if not isinstance(sub_layer, nn.BatchNorm2d):
+                    new_seq_layers.append(sub_layer)  # Keep all layers except BatchNorm
+            # Add the new Sequential layer to the new layers
+            if len(new_seq_layers) > 0:
+                new_layers.append(nn.Sequential(*new_seq_layers))
+        else:
+            # If it's not a Sequential layer (like AvgPool2d), keep it
+            new_layers.append(layer)
+
+    # Rebuild the model as a Sequential container with all new layers
+    return nn.Sequential(*new_layers)

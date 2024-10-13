@@ -28,6 +28,8 @@ import adaIN.net_mixup as net_mixup
 from resnet_wide import WideResNet_28_4
 from geo_trivialaugment import GeometricTrivialAugmentWide
 from utils import RandomChoiceTransforms
+from adaIN.mobilnet import EncoderNet, mobnet_decoder
+from mobilenet.function import remove_batchnorm
 
 import sys
 
@@ -85,16 +87,32 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, interpolate):
+def load_models(device, model_type):
 
-    vgg = net.vgg
-    decoder = net.decoder
-    vgg.load_state_dict(torch.load(encoder_path))
-    vgg = nn.Sequential(*list(vgg.children())[:31])
-    decoder.load_state_dict(torch.load(decoder_path))
+    if model_type == 'vgg':
+        encoder = net.vgg
+        decoder = net.decoder
+        encoder.load_state_dict(torch.load(encoder_path))
+        encoder = nn.Sequential(*list(vgg.children())[:31])
+        decoder.load_state_dict(torch.load(decoder_path))
 
-    vgg.to(device).eval()
-    decoder.to(device).eval()
+        vgg.to(device).eval()
+        decoder.to(device).eval()
+
+    elif model_type == 'mobilenet':
+        mobilenet_encoder_path = 'mobilenet/models/mobilenet_v1_encoder_weights.pth'
+        mobilenet_decoder_path = 'mobilenet/models/decoder_mobilenet_classic.pth.tar'
+        encoder = EncoderNet()
+        encoder.load_state_dict(torch.load(mobilenet_encoder_path))
+        encoder = remove_batchnorm(encoder)
+
+        decoder = mobnet_decoder
+        decoder.load_state_dict(torch.load(mobilenet_decoder_path))
+
+        encoder.to(device).eval()
+        decoder.to(device).eval()
+
+    
     return vgg, decoder
 
 def load_feat_files(feats_dir, device):
@@ -205,7 +223,7 @@ if __name__ == '__main__' :
     parser.add_argument('--randomize_alpha', type=bool, default=False, help='Make alpha random or fixed (default: False)')
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
-    parser.add_argument('--style_interpolation', type=bool, default=False, help='Use Style interpolated Model or not')
+    parser.add_argument('--style_transfer_model', type=str, default='vgg', help='VGG or MobileNet based AdaIN')
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
 
 
@@ -216,11 +234,11 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    vgg, decoder = load_models(device=device, interpolate = args.style_interpolation)
+    encoder, decoder = load_models(device=device, interpolate = args.style_transfer_model)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
-    nst_transfer = NSTTransform(style_feats, vgg=vgg, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
+    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
     transform2 = transforms.TrivialAugmentWide()
@@ -232,10 +250,10 @@ if __name__ == '__main__' :
     
  
     transform_train = transforms.Compose([
-        #nst_transfer,
+        nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
-        random_choice_transform,
+        #random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
