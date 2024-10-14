@@ -83,6 +83,7 @@ class NSTTransform(transforms.Transform):
 
             idx = torch.randperm(self.num_styles, device=device)[0]
             style_image = self.style_features[idx].unsqueeze(0)
+            print(style_image.shape, x.shape)
             
             stl_img = self.style_transfer(self.encoder, self.decoder, x, style_image)
             
