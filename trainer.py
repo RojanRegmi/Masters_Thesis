@@ -218,7 +218,7 @@ if __name__ == '__main__' :
     parser.add_argument('--randomize_alpha', type=bool, default=False, help='Make alpha random or fixed (default: False)')
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
-    parser.add_argument('--style_transfer_model', type=str, default='vgg', help='VGG or MobileNet based AdaIN')
+    parser.add_argument('--style_transfer_model', type=str, default='vgg', help='vgg or mobilenet')
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
 
 
