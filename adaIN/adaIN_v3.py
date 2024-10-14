@@ -83,8 +83,7 @@ class NSTTransform(transforms.Transform):
 
             idx = torch.randperm(self.num_styles, device=device)[0]
             style_image = self.style_features[idx].unsqueeze(0)
-            print(style_image.shape, x.shape)
-            
+
             stl_img = self.style_transfer(self.encoder, self.decoder, x, style_image)
             
             stl_img = self.downsample(stl_img).squeeze(0).cpu()
@@ -117,6 +116,7 @@ class NSTTransform(transforms.Transform):
 
         content_f = vgg(content)
         style_f = style
+        print(content_f.shape, style_f.shape)
         feat = adaptive_instance_normalization(content_f, style_f)
 
         feat = feat * alpha + content_f * (1 - alpha)
