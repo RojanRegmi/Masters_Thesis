@@ -2,12 +2,9 @@ import torch
 import torchvision
 import torch.multiprocessing as mp
 import torchvision.transforms as transforms
-from torch.optim.lr_scheduler import StepLR
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 import torch.optim as optim
-import torch.nn.functional as F
-
 
 import torch.nn as nn
 from PIL import Image
@@ -24,9 +21,7 @@ import argparse
 
 from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
-import adaIN.net_mixup as net_mixup
 from resnet_wide import WideResNet_28_4
-from geo_trivialaugment import GeometricTrivialAugmentWide
 from utils import RandomChoiceTransforms
 from adaIN.mobilnet import EncoderNet, mobnet_decoder
 from mobilenet.function import remove_batchnorm
@@ -93,15 +88,15 @@ def load_models(device, model_type):
         encoder = net.vgg
         decoder = net.decoder
         encoder.load_state_dict(torch.load(encoder_path))
-        encoder = nn.Sequential(*list(vgg.children())[:31])
+        encoder = nn.Sequential(*list(encoder.children())[:31])
         decoder.load_state_dict(torch.load(decoder_path))
 
-        vgg.to(device).eval()
+        encoder.to(device).eval()
         decoder.to(device).eval()
 
     elif model_type == 'mobilenet':
-        mobilenet_encoder_path = 'mobilenet/models/mobilenet_v1_encoder_weights.pth'
-        mobilenet_decoder_path = 'mobilenet/models/decoder_mobilenet_classic.pth.tar'
+        mobilenet_encoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/mobilenet_v1_encoder_weights.pth'
+        mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_mobilenet_classic.pth.tar'
         encoder = EncoderNet()
         encoder.load_state_dict(torch.load(mobilenet_encoder_path))
         encoder = remove_batchnorm(encoder)
@@ -113,7 +108,7 @@ def load_models(device, model_type):
         decoder.to(device).eval()
 
     
-    return vgg, decoder
+    return encoder, decoder
 
 def load_feat_files(feats_dir, device):
 
