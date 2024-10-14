@@ -116,6 +116,7 @@ class NSTTransform(transforms.Transform):
 
         content_f = vgg(content)
         style_f = style
+        print(content_f.shape, style_f.shape)
         feat = adaptive_instance_normalization(content_f, style_f)
 
         feat = feat * alpha + content_f * (1 - alpha)
