@@ -100,6 +100,7 @@ def load_models(device, model_type):
         encoder = EncoderNet()
         encoder.load_state_dict(torch.load(mobilenet_encoder_path))
         encoder = remove_batchnorm(encoder)
+        encoder = nn.Sequential(*list(encoder.children())[:5])
 
         decoder = mobnet_decoder
         decoder.load_state_dict(torch.load(mobilenet_decoder_path))
@@ -229,7 +230,7 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    encoder, decoder = load_models(device=device, interpolate = args.style_transfer_model)
+    encoder, decoder = load_models(device=device, model_type = args.style_transfer_model)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
@@ -239,16 +240,16 @@ if __name__ == '__main__' :
     transform2 = transforms.TrivialAugmentWide()
 
     transforms_list = [transform1, transform2]
-    probabilities = [0.3, 0.7]
+    probabilities = [0.5, 0.5]
 
     random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
     
  
     transform_train = transforms.Compose([
-        nst_transfer,
+        #nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
-        #random_choice_transform,
+        random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
