@@ -19,6 +19,7 @@ from gen_data_utils import load_augmented_traindata
 import time
 import logging
 import argparse
+import random
 
 from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
@@ -40,6 +41,13 @@ decoder_rel_path = 'adaIN/models/decoder.pth'
 encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.cuda.manual_seed(seed)
+
+torch.backends.cudnn.deterministic = True
 
 class CIFAR10(Dataset):
     def __init__(self, data_dir, train=True, transform=None):
