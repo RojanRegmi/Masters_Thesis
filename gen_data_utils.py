@@ -23,14 +23,9 @@ class AugmentedDataset(torch.utils.data.Dataset):
         x = self.images[i]
         aug_strat = self.transforms_augmentation if self.sources[i] == True else self.transforms_generated
         augment = transforms.Compose([self.transforms_basic, aug_strat])
-        if self.robust_samples == 0: # use this
-          return augment(x), self.labels[i]
-        elif self.robust_samples == 1:
-          im_tuple = (self.preprocess(x), augment(x))
-          return im_tuple, self.labels[i]
-        elif self.robust_samples == 2:
-          im_tuple = (self.preprocess(x), augment(x), augment(x))
-          return im_tuple, self.labels[i]
+        
+        return augment(x), self.labels[i]
+        
 
     def __len__(self):
         return len(self.labels)
@@ -49,7 +44,7 @@ def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0,
         transforms_preprocess = transforms.Compose([t])
         transforms_basic = transforms.Compose([flip, c32])
         tf = style_transfer
-        transforms_augmentation = transforms.Compose([tf, transforms_preprocess])
+        transforms_augmentation = transforms.Compose([tf, transforms_basic, transforms_preprocess])
         generated_ratio = generated_ratio
 
         #torch.manual_seed(seed)
