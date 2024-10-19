@@ -258,7 +258,7 @@ if __name__ == '__main__' :
         #random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
-        #transforms.ToTensor(),
+        transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     
@@ -283,8 +283,12 @@ if __name__ == '__main__' :
         testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
         if args.gen_data is True:
             baseset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
-            transform_gen = transforms.Compose([nst_transfer_gen, transforms.RandomHorizontalFlip(), transforms.RandomCrop(32, padding=4), #random_choice_transform, #transforms.TrivialAugmentWide(), 
-                                                transforms.ToTensor(),])
+            transform_gen = transforms.Compose([nst_transfer_gen, 
+                                                transforms.RandomHorizontalFlip(), 
+                                                transforms.RandomCrop(32, padding=4), 
+                                                #random_choice_transform, 
+                                                # #transforms.TrivialAugmentWide(), 
+                                                transforms.ToTensor()])
             trainset = load_augmented_traindata(base_trainset=baseset, style_transfer=nst_transfer, target_size=target_size, transforms_generated=transform_gen)
         net = WideResNet_28_4(num_classes=10)
 
