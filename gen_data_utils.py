@@ -22,6 +22,7 @@ class AugmentedDataset(torch.utils.data.Dataset):
         x = self.images[i]
         aug_strat = self.transforms_augmentation if self.sources[i] == True else self.transforms_generated
         augment = aug_strat #transforms.Compose([self.transforms_basic, aug_strat])
+        print(self.sources[i])
         
         return augment(x), self.labels[i]
         
