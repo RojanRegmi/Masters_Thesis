@@ -298,6 +298,7 @@ if __name__ == '__main__' :
                                                 #transforms.ToTensor()
                                                 ])
             trainset = load_augmented_traindata(base_trainset=baseset, style_transfer=nst_transfer, target_size=target_size, transforms_generated=transform_gen)
+            print('Mixed Dataset Loaded')
         else:
             trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
         testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
