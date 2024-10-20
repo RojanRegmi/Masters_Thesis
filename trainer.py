@@ -25,7 +25,7 @@ from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
 from resnet_wide import WideResNet_28_4
 from utils import RandomChoiceTransforms
-from adaIN.mobilnet import EncoderNet, mobnet_decoder
+from adaIN.mobilnet import EncoderNet, mobnet_decoder, SkipEncoder, SkipDecoder
 from mobilenet.function import remove_batchnorm
 
 import sys
@@ -91,7 +91,7 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, model_type):
+def load_models(device, model_type, skip=True):
 
     if model_type == 'vgg':
         encoder = net.vgg
@@ -105,13 +105,16 @@ def load_models(device, model_type):
 
     elif model_type == 'mobilenet':
         mobilenet_encoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/mobilenet_v1_encoder_weights.pth'
-        mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_mobilenet_classic.pth.tar'
+        mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_iter_100000.pth'
         encoder = EncoderNet()
         encoder.load_state_dict(torch.load(mobilenet_encoder_path))
         encoder = remove_batchnorm(encoder)
         encoder = nn.Sequential(*list(encoder.children())[:5])
-
         decoder = mobnet_decoder
+        if skip:
+            encoder = SkipEncoder(encoder=encoder)
+            decoder = SkipDecoder()
+
         decoder.load_state_dict(torch.load(mobilenet_decoder_path))
 
         encoder.to(device).eval()
@@ -244,7 +247,7 @@ if __name__ == '__main__' :
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
-    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
+    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=True)
     nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.gen_nst_prob, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
@@ -288,7 +291,7 @@ if __name__ == '__main__' :
     if args.dataset == 'cifar10':
         
         if args.gen_nst_prob > 0:
-            print(f'Loading Mixed Dataset with Generated Data. Gen Probability: {args.gen_nst_prob}')
+            print(f'Loading Mixed Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
             baseset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
             transform_gen = transforms.Compose([nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 

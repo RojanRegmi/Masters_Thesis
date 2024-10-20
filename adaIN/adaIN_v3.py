@@ -41,7 +41,7 @@ class NSTTransform(transforms.Transform):
     downsample = Downsamples the image back to 32 x 32. This is specific for CIFAR. Should be downsampled according to dataset.
 
      """
-    def __init__(self, style_feats, encoder, decoder, alpha=1.0, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1, model='vgg'):
+    def __init__(self, style_feats, encoder, decoder, alpha=1.0, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1, model='vgg', skip=False):
         super().__init__()
 
         self.encoder = encoder
@@ -74,7 +74,6 @@ class NSTTransform(transforms.Transform):
         # effective_prob = (1.0 - self.alpha)
 
         if torch.rand(1).item() < self.probability:
-            org_x = x
             x = self.to_tensor(x)
             x = x.to(device).unsqueeze(0)
             x = self.upsample(x)
@@ -83,8 +82,10 @@ class NSTTransform(transforms.Transform):
 
             idx = torch.randperm(self.num_styles, device=device)[0]
             style_image = self.style_features[idx].unsqueeze(0)
-
-            stl_img = self.style_transfer(self.encoder, self.decoder, x, style_image)
+            if self.skip:
+                stl_img = self.style_transfer_skip(self.encoder, self.decoder, x, style_image)
+            else:
+                stl_img = self.style_transfer(self.encoder, self.decoder, x, style_image)
             
             stl_img = self.downsample(stl_img).squeeze(0).cpu()
 
@@ -122,3 +123,20 @@ class NSTTransform(transforms.Transform):
         feat = feat * alpha + content_f * (1 - alpha)
         
         return decoder(feat)
+    
+    @torch.no_grad()
+    def style_transfer_skip(self, vgg, decoder, content, style):
+
+        content, content1 = vgg(content)
+        style, style1 = vgg(style)
+        alpha = self.alpha
+
+        feat = adaptive_instance_normalization(content, style)
+        feat1 = adaptive_instance_normalization(content1, style1)
+
+        feat = feat * alpha + content * (1-alpha)
+        feat1 = feat1 * alpha + content * (1-alpha)
+
+        return decoder(feat, feat1)
+    
+
