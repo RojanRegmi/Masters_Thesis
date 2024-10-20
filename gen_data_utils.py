@@ -6,9 +6,9 @@ import torchvision.transforms.functional as TF
 import numpy as np
 
 class AugmentedDataset(torch.utils.data.Dataset):
-    """Dataset wrapper to perform augmentations and allow robust loss functions."""
+    """Dataset wrapper to perform augmentations on Generated Data"""
 
-    def __init__(self, images, labels, sources, transforms_preprocess, transforms_basic, transforms_augmentation,
+    def __init__(self, images, labels, sources, transforms_preprocess, tf, transforms_basic, transforms_augmentation,
                  transforms_generated=None, robust_samples=0):
         self.images = images
         self.labels = labels
@@ -18,11 +18,12 @@ class AugmentedDataset(torch.utils.data.Dataset):
         self.transforms_augmentation = transforms_augmentation
         self.transforms_generated = transforms_generated if transforms_generated else transforms_augmentation
         self.robust_samples = robust_samples
+        self.tf = tf
 
     def __getitem__(self, i):
         x = self.images[i]
         aug_strat = self.transforms_augmentation if self.sources[i] == True else self.transforms_generated
-        augment = transforms.Compose([self.transforms_basic, aug_strat])
+        augment = aug_strat #transforms.Compose([self.transforms_basic, aug_strat])
         
         return augment(x), self.labels[i]
         
@@ -35,6 +36,7 @@ def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0,
         transforms_generated = transforms_generated
         robust_samples = robust_samples
         target_size = target_size
+        generated_ratio = generated_ratio
         generated_dataset = np.load(f'/kaggle/input/cifar10-1m-npz/1m.npz',
                                     mmap_mode='r') if generated_ratio > 0.0 else None
         flip = transforms.RandomHorizontalFlip()
@@ -44,8 +46,8 @@ def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0,
         transforms_preprocess = transforms.Compose([t])
         transforms_basic = transforms.Compose([flip, c32])
         tf = style_transfer
-        transforms_augmentation = transforms.Compose([tf, transforms_preprocess])
-        generated_ratio = generated_ratio
+        transforms_augmentation = transforms.Compose([tf, transforms_basic, transforms_preprocess])
+        
 
         #torch.manual_seed(seed)
         #np.random.seed(seed)
@@ -89,6 +91,6 @@ def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0,
             labels[num_original:target_size] = generated_labels
             sources[num_original:target_size] = [False] * num_generated
 
-        return AugmentedDataset(images, labels, sources, transforms_preprocess,
+        return AugmentedDataset(images, labels, sources, transforms_preprocess, tf,
                                          transforms_basic, transforms_augmentation, transforms_generated,
                                          robust_samples)

@@ -287,8 +287,7 @@ if __name__ == '__main__' :
     cifar_10_dir = args.content_dir
 
     if args.dataset == 'cifar10':
-        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-        testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+        
         if args.gen_data is True:
             baseset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
             transform_gen = transforms.Compose([nst_transfer_gen, 
@@ -298,6 +297,10 @@ if __name__ == '__main__' :
                                                 # #transforms.TrivialAugmentWide(), 
                                                 transforms.ToTensor()])
             trainset = load_augmented_traindata(base_trainset=baseset, style_transfer=nst_transfer, target_size=target_size, transforms_generated=transform_gen)
+        else:
+            trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
+        testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+
         net = WideResNet_28_4(num_classes=10)
 
     elif args.dataset == 'cifar100':
