@@ -230,7 +230,6 @@ if __name__ == '__main__' :
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
     parser.add_argument('--style_transfer_model', type=str, default='vgg', help='vgg or mobilenet')
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
-    parser.add_argument('--gen_data', type=str, default=False, help='Use Generated data or not')
     parser.add_argument('--gen_nst_prob', type=float, default=0.5, help='NST probability on generated data')
 
 
@@ -288,14 +287,16 @@ if __name__ == '__main__' :
 
     if args.dataset == 'cifar10':
         
-        if args.gen_data is True:
+        if args.gen_nst_prob > 0:
+            print(f'Loading Mixed Dataset with Generated Data. Gen Probability: {args.gen_nst_prob}')
             baseset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
             transform_gen = transforms.Compose([nst_transfer_gen, 
-                                                transforms.RandomHorizontalFlip(), 
-                                                transforms.RandomCrop(32, padding=4), 
+                                                #transforms.RandomHorizontalFlip(), 
+                                                #transforms.RandomCrop(32, padding=4), 
                                                 #random_choice_transform, 
                                                 # #transforms.TrivialAugmentWide(), 
-                                                transforms.ToTensor()])
+                                                #transforms.ToTensor()
+                                                ])
             trainset = load_augmented_traindata(base_trainset=baseset, style_transfer=nst_transfer, target_size=target_size, transforms_generated=transform_gen)
         else:
             trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
