@@ -8,8 +8,8 @@ import numpy as np
 class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
 
-    def __init__(self, images, labels, sources, transforms_preprocess, tf, transforms_basic, transforms_augmentation,
-                 transforms_generated=None, robust_samples=0):
+    def __init__(self, images, labels, sources, transforms_preprocess, transforms_basic, transforms_augmentation,
+                 transforms_generated=None):
         self.images = images
         self.labels = labels
         self.sources = sources
@@ -17,9 +17,7 @@ class AugmentedDataset(torch.utils.data.Dataset):
         self.transforms_basic = transforms_basic
         self.transforms_augmentation = transforms_augmentation
         self.transforms_generated = transforms_generated if transforms_generated else transforms_augmentation
-        self.robust_samples = robust_samples
-        self.tf = tf
-
+        
     def __getitem__(self, i):
         x = self.images[i]
         aug_strat = self.transforms_augmentation if self.sources[i] == True else self.transforms_generated
@@ -91,6 +89,6 @@ def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0,
             labels[num_original:target_size] = generated_labels
             sources[num_original:target_size] = [False] * num_generated
 
-        return AugmentedDataset(images, labels, sources, transforms_preprocess, tf,
-                                         transforms_basic, transforms_augmentation, transforms_generated,
-                                         robust_samples)
+        return AugmentedDataset(images, labels, sources, transforms_preprocess,
+                                         transforms_basic, transforms_augmentation, transforms_generated=transforms_generated,
+                                        )
