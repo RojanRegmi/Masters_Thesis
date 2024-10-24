@@ -125,10 +125,9 @@ class NSTTransform(transforms.Transform):
         return decoder(feat)
     
     @torch.no_grad()
-    def style_transfer_skip(self, vgg, decoder, content, style):
+    def style_transfer_skip(self, vgg, decoder, content, style, style1):
 
         content, content1 = vgg(content)
-        style, style1 = vgg(style)
         alpha = self.alpha
 
         feat = adaptive_instance_normalization(content, style)

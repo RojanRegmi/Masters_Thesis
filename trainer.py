@@ -110,10 +110,12 @@ def load_models(device, model_type, skip=True):
         encoder.load_state_dict(torch.load(mobilenet_encoder_path))
         encoder = remove_batchnorm(encoder)
         encoder = nn.Sequential(*list(encoder.children())[:5])
-        decoder = mobnet_decoder
+        #decoder = mobnet_decoder
         if skip:
             encoder = SkipEncoder(encoder=encoder)
             decoder = SkipDecoder()
+        else:
+            decoder = mobnet_decoder
 
         decoder.load_state_dict(torch.load(mobilenet_decoder_path))
 
