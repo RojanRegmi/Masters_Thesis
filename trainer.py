@@ -242,7 +242,7 @@ if __name__ == '__main__' :
 
     args = parser.parse_args()
 
-    #mp.set_start_method('spawn', force=True) 
+    mp.set_start_method('spawn', force=True) 
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
