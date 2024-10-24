@@ -59,6 +59,7 @@ class NSTTransform(transforms.Transform):
         self.rand_min = rand_min
         self.rand_max = rand_max
         self.to_pil_img = transforms.ToPILImage()
+        self.skip = skip
     
     """def randomize_alpha(self):
 
