@@ -41,7 +41,7 @@ class NSTTransform(transforms.Transform):
     downsample = Downsamples the image back to 32 x 32. This is specific for CIFAR. Should be downsampled according to dataset.
 
      """
-    def __init__(self, style_feats, encoder, decoder, alpha=1.0, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1, model='vgg', skip=False):
+    def __init__(self, style_feats, encoder, decoder, alpha=1.0, style1_feats =None, num_style_img=1000, probability=0.5, randomize=False, rand_min=0.2, rand_max=1, model='vgg', skip=False):
         super().__init__()
 
         self.encoder = encoder
@@ -52,6 +52,7 @@ class NSTTransform(transforms.Transform):
         self.downsample = nn.Upsample(size=(32, 32), mode='bilinear', align_corners=False)
         self.to_tensor = transforms.ToTensor()
         self.style_features = style_feats
+        self.style_feats_skip = style1_feats
         self.num_styles = len(self.style_features)
         self.probability = probability
         self.randomize = randomize
@@ -125,10 +126,11 @@ class NSTTransform(transforms.Transform):
         return decoder(feat)
     
     @torch.no_grad()
-    def style_transfer_skip(self, vgg, decoder, content, style, style1):
+    def style_transfer_skip(self, vgg, decoder, content, style):
 
         content, content1 = vgg(content)
         alpha = self.alpha
+        style1 = self.style_feats_skip
 
         feat = adaptive_instance_normalization(content, style)
         feat1 = adaptive_instance_normalization(content1, style1)

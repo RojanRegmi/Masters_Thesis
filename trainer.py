@@ -230,6 +230,7 @@ if __name__ == '__main__' :
     parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
     parser.add_argument('--content_dir', type=str, default='/kaggle/input/cifar10-python/cifar-10-batches-py/', help='CIFAR10 Directory')
     parser.add_argument('--style_dir', type=str, default='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', help='Style_feats_directory')
+    parser.add_argument('--style1_dir', type=str, default='/kaggle/input/mobilenet_layer_3/mobilenet_layer_3_outputs.npy', help='Style directory for features for skip connection in multi-layer AdaIN')
     parser.add_argument('--randomize_alpha', type=bool, default=False, help='Make alpha random or fixed (default: False)')
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
@@ -241,15 +242,16 @@ if __name__ == '__main__' :
 
     args = parser.parse_args()
 
-    mp.set_start_method('spawn', force=True) 
+    #mp.set_start_method('spawn', force=True) 
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     encoder, decoder = load_models(device=device, model_type = args.style_transfer_model)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
+    style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
 
-    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=True)
+    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, style1_feats=style1_feats, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=True)
     nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.gen_nst_prob, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
