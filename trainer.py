@@ -20,6 +20,7 @@ import time
 import logging
 import argparse
 import random
+import matplotlib.pyplot as plt
 
 from adaIN.adaIN_v3 import NSTTransform
 import adaIN.net as net
@@ -132,6 +133,12 @@ def load_feat_files(feats_dir, device):
     style_feats_tensor = style_feats_tensor.to(device)
     return style_feats_tensor
 
+def imshow(img):
+    npimg = img.numpy()
+    plt.figure(figsize=(20, 25))  # Adjust the width and height as needed
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.show()
+
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
 
@@ -238,6 +245,7 @@ if __name__ == '__main__' :
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
     parser.add_argument('--gen_nst_prob', type=float, default=0.5, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
+    parser.add_argument('--print_batch', type=bool, default=False, help='print a batch of the transformed input')
 
 
 
@@ -326,7 +334,12 @@ if __name__ == '__main__' :
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4)
     
-
+    if args.print_batch:
+        dataiter = iter(trainloader)
+        images, labels = next(dataiter)
+        img_grid = torchvision.utils.make_grid(images)
+        imshow(img_grid)
+        
     #net = WideResNet_28_4(num_classes=100)
     net.to(device)
 
