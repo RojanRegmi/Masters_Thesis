@@ -105,7 +105,7 @@ def load_models(device, model_type, skip=True):
 
     elif model_type == 'mobilenet':
         mobilenet_encoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/mobilenet_v1_encoder_weights.pth'
-        mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_iter_100000.pth'
+        mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_iter_100000.pth.tar'
         encoder = EncoderNet()
         encoder.load_state_dict(torch.load(mobilenet_encoder_path))
         encoder = remove_batchnorm(encoder)
