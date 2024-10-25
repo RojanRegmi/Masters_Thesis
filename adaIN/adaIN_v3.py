@@ -133,6 +133,8 @@ class NSTTransform(transforms.Transform):
 
         content, content1 = vgg(content)
         alpha = self.alpha
+        print(f'Content Shapes: {content.shape, content1.shape}')
+        print(f'Style Shapes: {style.shape, style1.shape}')
 
         feat = adaptive_instance_normalization(content, style)
         feat1 = adaptive_instance_normalization(content1, style1)
