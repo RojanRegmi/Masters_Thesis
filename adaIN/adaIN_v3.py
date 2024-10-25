@@ -84,8 +84,9 @@ class NSTTransform(transforms.Transform):
 
             idx = torch.randperm(self.num_styles, device=device)[0]
             style_image = self.style_features[idx].unsqueeze(0)
+            style1_image = self.style_feats_skip[idx].unsqueeze(0)
             if self.skip:
-                stl_img = self.style_transfer_skip(self.encoder, self.decoder, x, style_image)
+                stl_img = self.style_transfer_skip(self.encoder, self.decoder, x, style_image, style1=style1_image)
             else:
                 stl_img = self.style_transfer(self.encoder, self.decoder, x, style_image)
             
@@ -127,11 +128,10 @@ class NSTTransform(transforms.Transform):
         return decoder(feat)
     
     @torch.no_grad()
-    def style_transfer_skip(self, vgg, decoder, content, style):
+    def style_transfer_skip(self, vgg, decoder, content, style, style1):
 
         content, content1 = vgg(content)
         alpha = self.alpha
-        style1 = self.style_feats_skip
 
         feat = adaptive_instance_normalization(content, style)
         feat1 = adaptive_instance_normalization(content1, style1)

@@ -230,13 +230,14 @@ if __name__ == '__main__' :
     parser.add_argument('--prob_ratio', type=float, default=0.5, help='probability of applying style transfer (default: 0.5)')
     parser.add_argument('--content_dir', type=str, default='/kaggle/input/cifar10-python/cifar-10-batches-py/', help='CIFAR10 Directory')
     parser.add_argument('--style_dir', type=str, default='/kaggle/input/style-feats-adain-1000/style_feats_adain_1000.npy', help='Style_feats_directory')
-    parser.add_argument('--style1_dir', type=str, default='/kaggle/input/mobilenet_layer_3/mobilenet_layer_3_outputs.npy', help='Style directory for features for skip connection in multi-layer AdaIN')
+    parser.add_argument('--style1_dir', type=str, default='/kaggle/input/mobilenet_skip_style_features/mobilenet_layer_3_outputs/mobilenet_layer_3_outputs.npy', help='Style directory for features for skip connection in multi-layer AdaIN')
     parser.add_argument('--randomize_alpha', type=bool, default=False, help='Make alpha random or fixed (default: False)')
     parser.add_argument('--rand_min', type=float, default=0.2, help='lower range for random alpha when randomize_alpha is True (deafault: 0.2)')
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
     parser.add_argument('--style_transfer_model', type=str, default='vgg', help='vgg or mobilenet')
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
     parser.add_argument('--gen_nst_prob', type=float, default=0.5, help='NST probability on generated data')
+    parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
 
 
 
@@ -249,9 +250,10 @@ if __name__ == '__main__' :
     encoder, decoder = load_models(device=device, model_type = args.style_transfer_model)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
-    style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
+    if args.skip:
+        style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
 
-    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, style1_feats=style1_feats, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=True)
+    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, style1_feats=style1_feats, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
     nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.gen_nst_prob, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
