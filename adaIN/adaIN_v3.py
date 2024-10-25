@@ -140,7 +140,7 @@ class NSTTransform(transforms.Transform):
         feat1 = adaptive_instance_normalization(content1, style1)
 
         feat = feat * alpha + content * (1-alpha)
-        feat1 = feat1 * alpha + content * (1-alpha)
+        feat1 = feat1 * alpha + content1 * (1-alpha)
 
         return decoder(feat, feat1)
     
