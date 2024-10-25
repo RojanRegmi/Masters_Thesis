@@ -137,7 +137,7 @@ def imshow(img):
     npimg = img.numpy()
     plt.figure(figsize=(20, 25))  # Adjust the width and height as needed
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
+    plt.savefig('train_dataloader.png')
 
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
@@ -339,7 +339,7 @@ if __name__ == '__main__' :
         images, labels = next(dataiter)
         img_grid = torchvision.utils.make_grid(images)
         imshow(img_grid)
-        
+
     #net = WideResNet_28_4(num_classes=100)
     net.to(device)
 
