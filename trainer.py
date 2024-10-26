@@ -263,7 +263,7 @@ if __name__ == '__main__' :
         style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
 
     nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
-    nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
+    #nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
     transform2 = transforms.TrivialAugmentWide()
@@ -277,6 +277,8 @@ if __name__ == '__main__' :
     nst_gen_prob = args.gen_nst_prob
     ta_gen_prob = 1 - nst_gen_prob
     probabilities_gen = [nst_gen_prob, ta_gen_prob]
+
+    print(f'Original Data NST and TA Probability: {nst_prob, ta_prob} and type {type(nst_prob), type(ta_prob)} and generated data NST and TA Prob {nst_gen_prob, ta_gen_prob}')
 
 
     random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
@@ -314,14 +316,14 @@ if __name__ == '__main__' :
         if args.gen_nst_prob > 0:
             print(f'Loading Mixed Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
             baseset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
-            transform_gen = transforms.Compose([nst_transfer_gen, 
+            transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
                                                 #transforms.RandomCrop(32, padding=4), 
-                                                #random_choice_transform, 
+                                                random_choice_gen, 
                                                 # #transforms.TrivialAugmentWide(), 
                                                 #transforms.ToTensor()
                                                 ])
-            trainset = load_augmented_traindata(base_trainset=baseset, style_transfer=nst_transfer, target_size=target_size, transforms_generated=transform_gen)
+            trainset = load_augmented_traindata(base_trainset=baseset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
             print('Mixed Dataset Loaded')
         else:
             trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)

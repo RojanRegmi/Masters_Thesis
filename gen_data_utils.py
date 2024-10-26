@@ -30,7 +30,7 @@ class AugmentedDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.labels)
 
-def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0, transforms_generated = None, generated_ratio = 0.5, robust_samples=0):
+def load_augmented_traindata(base_trainset, target_size, tf, seed=0, transforms_generated = None, generated_ratio = 0.5, robust_samples=0):
 
         transforms_generated = transforms_generated
         robust_samples = robust_samples
@@ -44,7 +44,7 @@ def load_augmented_traindata(base_trainset, target_size, style_transfer, seed=0,
         
         transforms_preprocess = transforms.Compose([t])
         transforms_basic = transforms.Compose([flip, c32])
-        tf = style_transfer
+        tf = tf
         transforms_augmentation = transforms.Compose([transforms_basic, tf,  transforms_preprocess])
         transforms_generated = transforms.Compose([transforms_basic, transforms_generated, transforms_preprocess])
         
