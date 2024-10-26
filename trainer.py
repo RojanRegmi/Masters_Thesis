@@ -258,7 +258,8 @@ if __name__ == '__main__' :
     encoder, decoder = load_models(device=device, model_type = args.style_transfer_model)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
-    if args.skip:
+
+    if args.skip is True:
         style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
 
     nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, style1_feats=style1_feats, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
