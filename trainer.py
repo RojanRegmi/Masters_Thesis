@@ -323,7 +323,7 @@ if __name__ == '__main__' :
                                                 # #transforms.TrivialAugmentWide(), 
                                                 #transforms.ToTensor()
                                                 ])
-            trainset = load_augmented_traindata(base_trainset=baseset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
+            trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
             print('Mixed Dataset Loaded')
         else:
             trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
@@ -344,7 +344,7 @@ if __name__ == '__main__' :
                                                 #transforms.ToTensor()
 
             ])
-            trainset = load_augmented_traindata(base_trainset=baseset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
+            trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
         print('Mixed Dataset Loaded')
         net = WideResNet_28_4(num_classes=100)
