@@ -30,14 +30,19 @@ class AugmentedDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.labels)
 
-def load_augmented_traindata(base_trainset, target_size, tf, seed=0, transforms_generated = None, generated_ratio = 0.5, robust_samples=0):
+def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, transforms_generated = None, generated_ratio = 0.5, robust_samples=0):
 
         transforms_generated = transforms_generated
         robust_samples = robust_samples
         target_size = target_size
         generated_ratio = generated_ratio
-        generated_dataset = np.load(f'/kaggle/input/cifar10-1m-npz/1m.npz',
+        if dataset == 'cifar10':
+            generated_dataset = np.load(f'/kaggle/input/cifar10-1m-npz/1m.npz',
                                     mmap_mode='r') if generated_ratio > 0.0 else None
+        elif dataset == 'cifar100':
+            generated_dataset = np.load(f'/kaggle/input/cifar-100-1m-generated/1m.npz',
+                                    mmap_mode='r') if generated_ratio > 0.0 else None
+
         flip = transforms.RandomHorizontalFlip()
         c32 = transforms.RandomCrop(32, padding=4)
         t = transforms.ToTensor()

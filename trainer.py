@@ -243,7 +243,7 @@ if __name__ == '__main__' :
     parser.add_argument('--rand_max', type=float, default=1.0, help='Upper range for random alpha when randomize_alpha is True (deafault: 1.0)')
     parser.add_argument('--style_transfer_model', type=str, default='vgg', help='vgg or mobilenet')
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
-    parser.add_argument('--gen_nst_prob', type=float, default=0.5, help='NST probability on generated data')
+    parser.add_argument('--gen_nst_prob', type=float, default=0.0, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
     parser.add_argument('--print_batch', type=bool, default=False, help='print a batch of the transformed input')
 
@@ -314,7 +314,7 @@ if __name__ == '__main__' :
     if args.dataset == 'cifar10':
         
         if args.gen_nst_prob > 0:
-            print(f'Loading Mixed Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
+            print(f'Loading Mixed CIFAR 10 Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
             baseset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=None)
             transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
@@ -334,7 +334,7 @@ if __name__ == '__main__' :
     elif args.dataset == 'cifar100':
 
         if args.gen_nst_prob > 0:
-            print(f'Loading Mixed Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
+            print(f'Loading Mixed CIFAR 100 Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
             baseset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=None)
             transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
@@ -344,6 +344,7 @@ if __name__ == '__main__' :
                                                 #transforms.ToTensor()
 
             ])
+            trainset = load_augmented_traindata(base_trainset=baseset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
         print('Mixed Dataset Loaded')
         net = WideResNet_28_4(num_classes=100)
