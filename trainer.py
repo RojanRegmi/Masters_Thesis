@@ -261,25 +261,31 @@ if __name__ == '__main__' :
     if args.skip:
         style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
 
-    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, style1_feats=style1_feats, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
-    nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=args.gen_nst_prob, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
+    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, style1_feats=style1_feats, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
+    nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
     transform2 = transforms.TrivialAugmentWide()
 
 
     transforms_list = [transform1, transform2]
-    probabilities = [0.5, 0.5]
+    nst_prob = args.prob_ratio
+    ta_prob = 1 - nst_prob
+    probabilities = [nst_prob, ta_prob]
+    
+    nst_gen_prob = args.gen_nst_prob
+    ta_gen_prob = 1 - nst_gen_prob
+    probabilities_gen = [nst_gen_prob, ta_gen_prob]
+
 
     random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
+    random_choice_gen = RandomChoiceTransforms(transforms_list, probabilities_gen)
 
-    
- 
     transform_train = transforms.Compose([
-        nst_transfer,
+        #nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
-        #random_choice_transform,
+        random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
@@ -323,8 +329,20 @@ if __name__ == '__main__' :
         net = WideResNet_28_4(num_classes=10)
 
     elif args.dataset == 'cifar100':
-        trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
+
+        if args.gen_nst_prob > 0:
+            print(f'Loading Mixed Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
+            baseset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=None)
+            transform_gen = transforms.Compose([#nst_transfer_gen, 
+                                                #transforms.RandomHorizontalFlip(), 
+                                                #transforms.RandomCrop(32, padding=4), 
+                                                random_choice_gen, 
+                                                # #transforms.TrivialAugmentWide(), 
+                                                #transforms.ToTensor()
+
+            ])
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
+        print('Mixed Dataset Loaded')
         net = WideResNet_28_4(num_classes=100)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
