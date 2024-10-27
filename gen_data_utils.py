@@ -55,12 +55,12 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
 
         print("Transforms in transform_augmentation: ")
         for transform in transforms_augmentation.transforms:
-            for t in transform:
+            for t in transform.transforms:
                 print(type(t))
         
         print("Transforms in transform_generated: ")
         for transform in transform_generated.transforms:
-            for t in transform:
+            for t in transform.transforms:
                 print(type(t))
         
 
