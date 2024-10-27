@@ -319,7 +319,7 @@ if __name__ == '__main__' :
             transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
                                                 #transforms.RandomCrop(32, padding=4), 
-                                                #random_choice_gen, 
+                                                random_choice_gen, 
                                                 # #transforms.TrivialAugmentWide(), 
                                                 #transforms.ToTensor()
                                                 ])
@@ -336,7 +336,7 @@ if __name__ == '__main__' :
         if args.gen_nst_prob > 0:
             print(f'Loading Mixed CIFAR 100 Dataset with Generated Data. Gen Style Transfer Probability: {args.gen_nst_prob}, Original Style Transfer Probability: {args.prob_ratio}')
             baseset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=None)
-            transform_gen = transforms.Compose([nst_transfer_gen, 
+            transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
                                                 #transforms.RandomCrop(32, padding=4), 
                                                 #random_choice_gen, 
