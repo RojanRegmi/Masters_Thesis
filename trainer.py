@@ -245,7 +245,7 @@ if __name__ == '__main__' :
     parser.add_argument('--dataset', type=str, default='cifar10', help='cifar10 or cifar100')
     parser.add_argument('--gen_nst_prob', type=float, default=0.0, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
-    parser.add_argument('--print_batch', type=bool, default=False, help='print a batch of the transformed input')
+    parser.add_argument('--print_batch', type=bool, default=True, help='print a batch of the transformed input')
 
 
 
@@ -286,12 +286,12 @@ if __name__ == '__main__' :
 
     transform_train = transforms.Compose([
         #nst_transfer,
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomCrop(32, padding=4),
-        random_choice_transform,
+        #transforms.RandomHorizontalFlip(),
+        #transforms.RandomCrop(32, padding=4),
+        #random_choice_transform,
         #GeometricTrivialAugmentWide(),  
-        #transforms.TrivialAugmentWide(),
-        transforms.ToTensor(),
+        transforms.TrivialAugmentWide(),
+        #transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     
@@ -339,12 +339,12 @@ if __name__ == '__main__' :
             transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
                                                 #transforms.RandomCrop(32, padding=4), 
-                                                random_choice_gen, 
-                                                # #transforms.TrivialAugmentWide(), 
+                                                #random_choice_gen, 
+                                                transforms.TrivialAugmentWide(), 
                                                 #transforms.ToTensor()
 
             ])
-            trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=random_choice_gen)
+            trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
         print('Mixed Dataset Loaded')
         net = WideResNet_28_4(num_classes=100)
