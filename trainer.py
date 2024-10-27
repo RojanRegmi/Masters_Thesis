@@ -92,7 +92,7 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, model_type, skip=True):
+def load_models(device, model_type, skip=False):
 
     if model_type == 'vgg':
         encoder = net.vgg

@@ -52,6 +52,10 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
         tf = tf
         transforms_augmentation = transforms.Compose([transforms_basic, tf,  transforms_preprocess])
         transforms_generated = transforms.Compose([transforms_basic, transforms_generated, transforms_preprocess])
+
+        print("Transforms in transform_generated: ")
+        for t in transforms_generated.transforms:
+            print(type(t))
         
 
         #torch.manual_seed(seed)
