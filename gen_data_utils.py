@@ -51,15 +51,17 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
         transforms_basic = transforms.Compose([flip, c32])
         tf = tf
         transforms_augmentation = transforms.Compose([transforms_basic, tf,  transforms_preprocess])
-        transforms_generated = transforms.Compose([transforms_basic, transforms_generated, transforms_preprocess])
+        transform_generated = transforms.Compose([transforms_basic, transforms_generated, transforms_preprocess])
 
         print("Transforms in transform_augmentation: ")
-        for t in transforms_augmentation.transforms:
-            print(type(t))
-
+        for transform in transforms_augmentation.transforms:
+            for t in transform:
+                print(type(t))
+        
         print("Transforms in transform_generated: ")
-        for t in transforms_generated.transforms:
-            print(type(t))
+        for transform in transform_generated.transforms:
+            for t in transform:
+                print(type(t))
         
 
         #torch.manual_seed(seed)
@@ -105,5 +107,5 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
             sources[num_original:target_size] = [False] * num_generated
 
         return AugmentedDataset(images, labels, sources, transforms_preprocess,
-                                         transforms_basic, transforms_augmentation, transforms_generated=transforms_generated,
+                                         transforms_basic, transforms_augmentation, transforms_generated=transform_generated,
                                         )
