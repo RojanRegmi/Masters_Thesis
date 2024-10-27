@@ -53,6 +53,10 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
         transforms_augmentation = transforms.Compose([transforms_basic, tf,  transforms_preprocess])
         transforms_generated = transforms.Compose([transforms_basic, transforms_generated, transforms_preprocess])
 
+        print("Transforms in transform_augmentation: ")
+        for t in transforms_augmentation.transforms:
+            print(type(t))
+
         print("Transforms in transform_generated: ")
         for t in transforms_generated.transforms:
             print(type(t))
