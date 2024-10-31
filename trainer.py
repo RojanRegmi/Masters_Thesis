@@ -139,6 +139,11 @@ def imshow(img):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.savefig('train_dataloader.png')
 
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
+
 
 def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
 
@@ -155,7 +160,7 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
    
     for epoch in range(epochs):
 
-        torch.set_seed(seed + epoch)
+        torch.manual_seed(seed + epoch)
         np.random.seed(seed + epoch)
         random.seed(seed + epoch)
         torch.cuda.manual_seed(seed + epoch)
