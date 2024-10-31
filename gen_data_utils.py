@@ -9,14 +9,14 @@ class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
 
     def __init__(self, images, labels, sources, transforms_preprocess, transforms_basic, transforms_augmentation,
-                 transforms_generated=None):
+                 transforms_generated):
         self.images = images
         self.labels = labels
         self.sources = sources
         self.preprocess = transforms_preprocess
         self.transforms_basic = transforms_basic
         self.transforms_augmentation = transforms_augmentation
-        self.transforms_generated = transforms_generated if transforms_generated else transforms_augmentation
+        self.transforms_generated = transforms_generated #if transforms_generated else transforms_augmentation
         
     def __getitem__(self, i):
         x = self.images[i]
