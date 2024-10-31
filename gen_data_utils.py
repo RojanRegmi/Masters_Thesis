@@ -9,7 +9,7 @@ class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
 
     def __init__(self, images, labels, sources, transforms_preprocess, transforms_basic, transforms_augmentation,
-                 transforms_generated):
+                 transforms_generated=None):
         self.images = images
         self.labels = labels
         self.sources = sources
@@ -17,6 +17,17 @@ class AugmentedDataset(torch.utils.data.Dataset):
         self.transforms_basic = transforms_basic
         self.transforms_augmentation = transforms_augmentation
         self.transforms_generated = transforms_generated #if transforms_generated else transforms_augmentation
+
+        print("Transforms in transform_augmentation: ")
+        for transform in self.transforms_augmentation.transforms:
+            for t in transform.transforms:
+                print(type(t))
+        
+        print("Transforms in transform_generated: ")
+        for transform in self.transforms_generated.transforms:
+            for t in transform.transforms:
+                print(type(t))
+
         
     def __getitem__(self, i):
         x = self.images[i]
@@ -53,15 +64,6 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
         transforms_augmentation = transforms.Compose([transforms_basic, tf,  transforms_preprocess])
         transform_generated = transforms.Compose([transforms_basic, transforms_generated, transforms_preprocess])
 
-        print("Transforms in transform_augmentation: ")
-        for transform in transforms_augmentation.transforms:
-            for t in transform.transforms:
-                print(type(t))
-        
-        print("Transforms in transform_generated: ")
-        for transform in transform_generated.transforms:
-            for t in transform.transforms:
-                print(type(t))
         
 
         #torch.manual_seed(seed)
