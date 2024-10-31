@@ -69,7 +69,7 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
         #torch.manual_seed(seed)
         #np.random.seed(seed)
         #random.seed(seed)
-        print(f'Length of Generated Dataset{len(generated_dataset)}')
+        print(f'Length of Generated Dataset{len(generated_dataset[0])}')
 
         # Prepare lists for combined data
         images = [None] * target_size
