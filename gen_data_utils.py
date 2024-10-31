@@ -97,9 +97,12 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
             generated_labels = generated_dataset['label'][generated_indices]
 
             original_subset = Subset(base_trainset, original_indices)
-            original_images, original_labels = zip(*original_subset)
+            #original_images, original_labels = zip(*original_subset)
+            original_images, original_labels = map(list, zip(*original_subset))
+
             if isinstance(original_images[0], torch.Tensor):
-                original_images = [TF.to_pil_image(img) for img in original_images if isinstance(img, torch.Tensor)]
+                #original_images = [TF.to_pil_image(img) for img in original_images if isinstance(img, torch.Tensor)]
+                original_images = TF.to_pil_image(original_images)
 
 
             # Transform and append original data
