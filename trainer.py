@@ -155,6 +155,11 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
    
     for epoch in range(epochs):
 
+        torch.set_seed(seed + epoch)
+        np.random.seed(seed + epoch)
+        random.seed(seed + epoch)
+        torch.cuda.manual_seed(seed + epoch)
+
         epoch_start_time = time.time()
         running_loss = 0.0
         total_train = 0
