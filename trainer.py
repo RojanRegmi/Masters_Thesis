@@ -42,13 +42,13 @@ decoder_rel_path = 'adaIN/models/decoder.pth'
 encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 
-seed = 42
-torch.manual_seed(seed)
-np.random.seed(seed)
-random.seed(seed)
-torch.cuda.manual_seed(seed)
+#seed = 42
+#torch.manual_seed(seed)
+#np.random.seed(seed)
+#random.seed(seed)
+#torch.cuda.manual_seed(seed)
 
-torch.backends.cudnn.deterministic = True
+#torch.backends.cudnn.deterministic = True
 
 class CIFAR10(Dataset):
     def __init__(self, data_dir, train=True, transform=None):
@@ -160,10 +160,10 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
    
     for epoch in range(epochs):
 
-        torch.manual_seed(seed + epoch)
-        np.random.seed(seed + epoch)
-        random.seed(seed + epoch)
-        torch.cuda.manual_seed(seed + epoch)
+        #torch.manual_seed(seed + epoch)
+        #np.random.seed(seed + epoch)
+        #random.seed(seed + epoch)
+        #torch.cuda.manual_seed(seed + epoch)
 
         epoch_start_time = time.time()
         running_loss = 0.0
@@ -176,10 +176,10 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
         for i, (inputs, labels) in enumerate(trainloader):
 
-            torch.manual_seed(seed + epoch + i)
-            np.random.seed(seed + epoch + i)
-            random.seed(seed + epoch + i)
-            torch.cuda.manual_seed(seed + epoch + i)
+            #torch.manual_seed(seed + epoch + i)
+            #np.random.seed(seed + epoch + i)
+            #random.seed(seed + epoch + i)
+            #torch.cuda.manual_seed(seed + epoch + i)
 
             logging.info(f'Start Training batch {i}')
             # zero the parameter gradients
