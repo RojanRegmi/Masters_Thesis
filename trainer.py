@@ -303,7 +303,7 @@ if __name__ == '__main__' :
         #nst_transfer,
         #transforms.RandomHorizontalFlip(),
         #transforms.RandomCrop(32, padding=4),
-        random_choice_transform,
+        #random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         #transforms.ToTensor(),
@@ -355,7 +355,7 @@ if __name__ == '__main__' :
             transform_gen = transforms.Compose([#nst_transfer_gen, 
                                                 #transforms.RandomHorizontalFlip(), 
                                                 #transforms.RandomCrop(32, padding=4), 
-                                                random_choice_gen, 
+                                                #random_choice_gen, 
                                                 #transforms.TrivialAugmentWide(), 
                                                 #transforms.ToTensor()
 
