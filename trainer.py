@@ -176,6 +176,11 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
 
         for i, (inputs, labels) in enumerate(trainloader):
 
+            torch.manual_seed(seed + epoch + i)
+            np.random.seed(seed + epoch + i)
+            random.seed(seed + epoch + i)
+            torch.cuda.manual_seed(seed + epoch + i)
+
             logging.info(f'Start Training batch {i}')
             # zero the parameter gradients
             optimizer.zero_grad()
