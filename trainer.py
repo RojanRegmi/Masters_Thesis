@@ -92,7 +92,7 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, model_type, skip=False, vgg_layer=4):
+def load_models(device, model_type, skip=False, vgg_layer=3):
 
     if model_type == 'vgg':
         encoder = net.vgg
@@ -264,7 +264,7 @@ if __name__ == '__main__' :
     parser.add_argument('--gen_nst_prob', type=float, default=0.0, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
     parser.add_argument('--print_batch', type=bool, default=True, help='print a batch of the transformed input')
-    parser.add_argument('--vgg_layer', type=int, default=4, help='Use the VGG encoder decoder pair after block 3 or 4')
+    parser.add_argument('--vgg_layer', type=int, default=3, help='Use the VGG encoder decoder pair after block 3 or 4')
 
 
 
