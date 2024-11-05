@@ -39,8 +39,10 @@ if module_path not in sys.path:
 
 encoder_rel_path = 'adaIN/models/vgg_normalised.pth'
 decoder_rel_path = 'adaIN/models/decoder.pth'
+reduced_decoder_rel_path = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
 encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
+decoder_path_new = os.path.join(current_dir, reduced_decoder_rel_path)
 
 #seed = 42
 #torch.manual_seed(seed)
@@ -101,7 +103,7 @@ def load_models(device, model_type, skip=False, reduced_vgg=True):
 
         if reduced_vgg is True:
             encoder = nn.Sequential(*list(encoder.children())[:18])
-            decoder_path_new = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
+            #decoder_path_new = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
             decoder = nn.Sequential(*list(decoder.children())[4:])
             decoder.load_state_dict(torch.load(decoder_path_new))
             print('Reduced VGG [Layer 3] loaded')
