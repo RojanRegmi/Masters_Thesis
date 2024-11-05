@@ -93,21 +93,29 @@ class CIFAR10(Dataset):
         return img, target
 
 def load_models(device, model_type, skip=False, vgg_layer=3):
-
+    
+    vgg_layer = vgg_layer
+    
     if model_type == 'vgg':
         encoder = net.vgg
         decoder = net.decoder
         encoder.load_state_dict(torch.load(encoder_path))
+
         if vgg_layer == 4:
             encoder = nn.Sequential(*list(encoder.children())[:31])
             decoder.load_state_dict(torch.load(decoder_path))
             print('VGG [Layer 4] loaded')
+
         elif vgg_layer == 3:
             encoder = nn.Sequential(*list(encoder.children())[:18])
             decoder_path_new = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
             decoder = nn.Sequential(*list(decoder.children())[4:])
             decoder.load_state_dict(torch.load(decoder_path_new))
             print('Reduced VGG [Layer 3] loaded')
+
+        else:
+            # Handle unsupported vgg_layer values
+            raise ValueError(f"Unsupported vgg_layer value: {vgg_layer}")
         
 
         encoder.to(device).eval()
