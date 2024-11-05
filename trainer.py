@@ -92,14 +92,20 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, model_type, skip=False):
+def load_models(device, model_type, skip=False, vgg_layer=4):
 
     if model_type == 'vgg':
         encoder = net.vgg
         decoder = net.decoder
         encoder.load_state_dict(torch.load(encoder_path))
-        encoder = nn.Sequential(*list(encoder.children())[:31])
-        decoder.load_state_dict(torch.load(decoder_path))
+        if vgg_layer == 4:
+            encoder = nn.Sequential(*list(encoder.children())[:31])
+            decoder.load_state_dict(torch.load(decoder_path))
+        elif vgg_layer == 3:
+            encoder = nn.Sequential(*list(encoder.children()[:18]))
+            decoder_path = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
+            decoder = nn.Sequential(*list(decoder.children())[4:])
+        
 
         encoder.to(device).eval()
         decoder.to(device).eval()
@@ -261,6 +267,7 @@ if __name__ == '__main__' :
     parser.add_argument('--gen_nst_prob', type=float, default=0.0, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
     parser.add_argument('--print_batch', type=bool, default=True, help='print a batch of the transformed input')
+    parser.add_argument('--vgg_layer', type=int, default=4, help='Use the VGG encoder decoder pair after block 3 or 4')
 
 
 
