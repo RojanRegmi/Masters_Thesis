@@ -103,8 +103,9 @@ def load_models(device, model_type, skip=False, vgg_layer=4):
             decoder.load_state_dict(torch.load(decoder_path))
         elif vgg_layer == 3:
             encoder = nn.Sequential(*list(encoder.children()[:18]))
-            decoder_path = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
+            decoder_path_new = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
             decoder = nn.Sequential(*list(decoder.children())[4:])
+            decoder.load_state_dict(torch.load(decoder_path_new))
         
 
         encoder.to(device).eval()
