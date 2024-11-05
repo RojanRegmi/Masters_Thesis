@@ -92,16 +92,14 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, model_type, skip=False, vgg_layer=3):
+def load_models(device, model_type, skip=False, reduced_vgg=True):
     
-    vgg_layer = vgg_layer
-
     if model_type == 'vgg':
         encoder = net.vgg
         decoder = net.decoder
         encoder.load_state_dict(torch.load(encoder_path))
 
-        if vgg_layer == 3:
+        if reduced_vgg is True:
             encoder = nn.Sequential(*list(encoder.children())[:18])
             decoder_path_new = './adaIN/models/decoder_reduced_layer_3.pth.tar'
             decoder = nn.Sequential(*list(decoder.children())[4:])
@@ -109,14 +107,10 @@ def load_models(device, model_type, skip=False, vgg_layer=3):
             print('Reduced VGG [Layer 3] loaded')
 
 
-        elif vgg_layer == 4:
+        else:
             encoder = nn.Sequential(*list(encoder.children())[:31])
             decoder.load_state_dict(torch.load(decoder_path))
-            print('VGG [Layer 4] loaded')  
-
-        else:
-            # Handle unsupported vgg_layer values
-            raise ValueError(f"Unsupported vgg_layer value: {vgg_layer}")
+            print('VGG [Layer 4] loaded')
         
 
         encoder.to(device).eval()
@@ -274,7 +268,7 @@ if __name__ == '__main__' :
     parser.add_argument('--gen_nst_prob', type=float, default=0.0, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
     parser.add_argument('--print_batch', type=bool, default=True, help='print a batch of the transformed input')
-    parser.add_argument('--vgg_layer', type=int, default=3, help='Use the VGG encoder decoder pair after block 3 or 4')
+    parser.add_argument('--reduced_vgg', type=bool, default=True, help='Use the VGG encoder decoder pair after block 3 or 4')
 
 
 
@@ -284,7 +278,7 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    encoder, decoder = load_models(device=device, model_type = args.style_transfer_model, vgg_layer=args.vgg_layer)
+    encoder, decoder = load_models(device=device, model_type = args.style_transfer_model, vgg_layer=args.reduced_vgg)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
