@@ -274,7 +274,7 @@ if __name__ == '__main__' :
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    encoder, decoder = load_models(device=device, model_type = args.style_transfer_model)
+    encoder, decoder = load_models(device=device, model_type = args.style_transfer_model, vgg_layer=args.vgg_layer)
 
     style_feats = load_feat_files(feats_dir=args.style_dir, device=device)
 
