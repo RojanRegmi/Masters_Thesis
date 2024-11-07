@@ -373,8 +373,11 @@ if __name__ == '__main__' :
             target_size = len(baseset)
             print(f'Target Size: {target_size}')
             trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
+            print('Mixed Dataset Loaded')
+        else:
+            trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
-        print('Mixed Dataset Loaded')
+        
         net = WideResNet_28_4(num_classes=100)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
