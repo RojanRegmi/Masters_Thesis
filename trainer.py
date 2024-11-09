@@ -314,10 +314,10 @@ if __name__ == '__main__' :
     random_choice_gen = RandomChoiceTransforms(transforms_list, probabilities_gen)
 
     transform_train = transforms.Compose([
-        #nst_transfer,
+        nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
-        random_choice_transform,
+        #random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
@@ -356,6 +356,7 @@ if __name__ == '__main__' :
             trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
             print('Mixed Dataset Loaded')
         else:
+            print('Loading Original CIFAR10')
             trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
         testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
 
@@ -379,6 +380,7 @@ if __name__ == '__main__' :
             trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
             print('Mixed Dataset Loaded')
         else:
+            print('Loading Original CIFAR100')
             trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
         
