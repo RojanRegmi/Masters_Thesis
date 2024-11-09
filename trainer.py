@@ -42,7 +42,7 @@ decoder_rel_path = 'adaIN/models/decoder.pth'
 reduced_decoder_rel_path = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
 encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
-decoder_path_new = os.path.join(current_dir, reduced_decoder_rel_path)
+decoder_path_reduced = os.path.join(current_dir, reduced_decoder_rel_path)
 
 #seed = 42
 #torch.manual_seed(seed)
@@ -105,7 +105,7 @@ def load_models(device, model_type, skip=False, reduced_vgg=False):
             encoder = nn.Sequential(*list(encoder.children())[:18])
             #decoder_path_new = 'adaIN/models/decoder_reduced_layer_3.pth.tar'
             decoder = nn.Sequential(*list(decoder.children())[4:])
-            decoder.load_state_dict(torch.load(decoder_path_new))
+            decoder.load_state_dict(torch.load(decoder_path_reduced))
             print('Reduced VGG [Layer 3] loaded')
 
 
@@ -120,7 +120,7 @@ def load_models(device, model_type, skip=False, reduced_vgg=False):
 
     elif model_type == 'mobilenet':
         mobilenet_encoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/mobilenet_v1_encoder_weights.pth'
-        mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_iter_100000.pth.tar'
+        
         encoder = EncoderNet()
         encoder.load_state_dict(torch.load(mobilenet_encoder_path))
         encoder = remove_batchnorm(encoder)
@@ -132,6 +132,7 @@ def load_models(device, model_type, skip=False, reduced_vgg=False):
             encoder = SkipEncoder(encoder=encoder)
             decoder = SkipDecoder()
         else:
+            mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_iter_100000.pth.tar'
             print('Using Standard MobileNet Encoder-Decoder')
             decoder = mobnet_decoder
 
@@ -313,10 +314,10 @@ if __name__ == '__main__' :
     random_choice_gen = RandomChoiceTransforms(transforms_list, probabilities_gen)
 
     transform_train = transforms.Compose([
-        nst_transfer,
+        #nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
-        #random_choice_transform,
+        random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
         transforms.ToTensor(),
