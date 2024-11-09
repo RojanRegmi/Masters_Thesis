@@ -94,7 +94,7 @@ class CIFAR10(Dataset):
         
         return img, target
 
-def load_models(device, model_type, skip=False, reduced_vgg=True):
+def load_models(device, model_type, skip=False, reduced_vgg=False):
     
     if model_type == 'vgg':
         encoder = net.vgg
@@ -127,9 +127,12 @@ def load_models(device, model_type, skip=False, reduced_vgg=True):
         encoder = nn.Sequential(*list(encoder.children())[:5])
         #decoder = mobnet_decoder
         if skip:
+            print('Using MobileNet with Skip Connections')
+            mobilenet_decoder_path = '/kaggle/working/Masters_Thesis/mobilenet/models/decoder_iter_100000_skip.pth.tar'
             encoder = SkipEncoder(encoder=encoder)
             decoder = SkipDecoder()
         else:
+            print('Using Standard MobileNet Encoder-Decoder')
             decoder = mobnet_decoder
 
         decoder.load_state_dict(torch.load(mobilenet_decoder_path))
@@ -270,7 +273,7 @@ if __name__ == '__main__' :
     parser.add_argument('--gen_nst_prob', type=float, default=0.0, help='NST probability on generated data')
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
     parser.add_argument('--print_batch', type=bool, default=True, help='print a batch of the transformed input')
-    parser.add_argument('--reduced_vgg', type=bool, default=True, help='Use the VGG encoder decoder pair after block 3 or 4')
+    parser.add_argument('--reduced_vgg', type=bool, default=False, help='Use the VGG encoder decoder pair after block 3 or 4')
 
 
 
