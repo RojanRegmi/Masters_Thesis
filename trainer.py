@@ -14,7 +14,7 @@ import numpy as np
 import pickle
 from torch.utils.data import Dataset
 import os
-from gen_data_utils import load_augmented_traindata
+from gen_data_utils import load_augmented_traindata, AugmentedTrainDataLoader
 
 import time
 import logging
@@ -44,13 +44,13 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 decoder_path_reduced = os.path.join(current_dir, reduced_decoder_rel_path)
 
-#seed = 42
-#torch.manual_seed(seed)
-#np.random.seed(seed)
-#random.seed(seed)
-#torch.cuda.manual_seed(seed)
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.cuda.manual_seed(seed)
 
-#torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.deterministic = True
 
 class CIFAR10(Dataset):
     def __init__(self, data_dir, train=True, transform=None):
@@ -163,7 +163,7 @@ def seed_worker(worker_id):
     random.seed(worker_seed)
 
 
-def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./cifar_net.pth'):
+def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, trainset=None, save_path='./cifar_net.pth'):
 
     log_file = 'training.log'
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler(log_file, mode='w'), logging.StreamHandler()])
@@ -191,6 +191,10 @@ def trainer_fn(epochs: int, net, trainloader, testloader, device, save_path='./c
         correct = 0
 
         net.train()
+
+        if gen_ratio > 0 and epoch != 0:
+            trainloader = trainset.update_trainset(epoch=epoch)
+
 
         for i, (inputs, labels) in enumerate(trainloader):
 
@@ -353,7 +357,8 @@ if __name__ == '__main__' :
                                                 #transforms.ToTensor()
                                                 ])
             target_size = len(baseset)
-            trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
+            #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
+            trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
             print('Mixed Dataset Loaded')
         else:
             print('Loading Original CIFAR10')
@@ -377,7 +382,8 @@ if __name__ == '__main__' :
             ])
             target_size = len(baseset)
             print(f'Target Size: {target_size}')
-            trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
+            #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
+            trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
             print('Mixed Dataset Loaded')
         else:
             print('Loading Original CIFAR100')
@@ -385,9 +391,12 @@ if __name__ == '__main__' :
         testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
         
         net = WideResNet_28_4(num_classes=100)
+    
+    g = torch.Generator()
+    g.manual_seed(seed=42)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4)
+                                            shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, )
 
     #testset = torchvision.datasets.CIFAR100(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
@@ -402,7 +411,7 @@ if __name__ == '__main__' :
     #net = WideResNet_28_4(num_classes=100)
     net.to(device)
 
-    trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, device=device, save_path='./cifar_net.pth')
+    trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, gen_ratio=args.gen_nst_prob, device=device, trainset=trainset, save_path='./cifar_net.pth')
 
 
     

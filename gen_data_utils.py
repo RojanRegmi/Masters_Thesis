@@ -1,9 +1,10 @@
 import torch
 from torchvision import transforms
 from PIL import Image
-from torch.utils.data import Subset
+from torch.utils.data import Subset, DataLoader
 import torchvision.transforms.functional as TF
 import numpy as np
+import random
 
 class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
@@ -118,3 +119,97 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
         return AugmentedDataset(images, labels, sources, transforms_preprocess,
                                          transforms_basic, transforms_augmentation, transforms_generated=transform_generated,
                                         )
+
+class AugmentedTrainDataLoader:
+    def __init__(self, base_trainset, target_size, dataset, tf, seed=42, transforms_generated=None, generated_ratio=0.5, robust_samples=0, number_workers=4):
+        self.base_trainset = base_trainset
+        self.target_size = target_size
+        self.dataset = dataset
+        self.tf = tf
+        self.seed = seed
+        self.transforms_generated = transforms_generated
+        self.generated_ratio = generated_ratio
+        self.robust_samples = robust_samples
+        self.number_workers = number_workers
+        self.generated_dataset = None
+        self.trainset = None
+        self.trainloader = None
+
+        # Load generated dataset based on provided ratio and dataset type
+        if self.generated_ratio > 0.0:
+            if dataset == 'cifar10':
+                self.generated_dataset = np.load(f'/kaggle/input/cifar10-1m-npz/1m.npz', mmap_mode='r')
+            elif dataset == 'cifar100':
+                self.generated_dataset = np.load(f'/kaggle/input/cifar-100-1m-generated/1m.npz', mmap_mode='r')
+
+        # Define basic transforms
+        self.flip = transforms.RandomHorizontalFlip()
+        self.c32 = transforms.RandomCrop(32, padding=4)
+        self.t = transforms.ToTensor()
+        self.transforms_preprocess = transforms.Compose([self.t])
+        self.transforms_basic = transforms.Compose([self.flip, self.c32])
+        self.transforms_augmentation = transforms.Compose([self.transforms_basic, self.tf, self.transforms_preprocess])
+        self.transform_generated = transforms.Compose([self.transforms_basic, self.transforms_generated, self.transforms_preprocess])
+
+    def load_augmented_traindata(self, epoch):
+
+        torch.manual_seed(epoch + self.seed)
+        np.random.seed(epoch + self.seed)
+        random.seed(epoch + self.seed)
+
+        images = [None] * self.target_size
+        labels = [None] * self.target_size
+        sources = [None] * self.target_size
+
+        if self.generated_dataset is None or self.generated_ratio == 0.0:
+            images, labels = zip(*self.base_trainset)
+            if isinstance(images[0], torch.Tensor):
+                images = [TF.to_pil_image(img) for img in images]
+            sources = [True] * len(self.base_trainset)
+        else:
+            num_generated = int(self.target_size * self.generated_ratio)
+            num_original = self.target_size - num_generated
+
+            original_perm = torch.randperm(len(self.base_trainset))
+            generated_perm = torch.randperm(len(self.generated_dataset['image']))
+
+            original_indices = original_perm[:num_original]
+            generated_indices = generated_perm[:num_generated]
+
+            generated_images = [Image.fromarray(img) for img in self.generated_dataset['image'][generated_indices]]
+            generated_labels = self.generated_dataset['label'][generated_indices]
+
+            original_subset = Subset(self.base_trainset, original_indices)
+            original_images, original_labels = map(list, zip(*original_subset))
+
+            if isinstance(original_images[0], torch.Tensor):
+                original_images = [TF.to_pil_image(img) for img in original_images]
+
+            images[:num_original] = original_images
+            labels[:num_original] = original_labels
+            sources[:num_original] = [True] * num_original
+
+            images[num_original:self.target_size] = generated_images
+            labels[num_original:self.target_size] = generated_labels
+            sources[num_original:self.target_size] = [False] * num_generated
+
+        self.trainset = AugmentedDataset(images, labels, sources, self.transforms_preprocess,
+                                         self.transforms_basic, self.transforms_augmentation, transforms_generated=self.transform_generated)
+        return self.trainset
+
+    def update_trainset(self, epoch, start_epoch=0):
+        if self.generated_ratio != 0.0 and epoch != 0 and epoch != start_epoch:
+            self.load_augmented_traindata(epoch)
+
+        g = torch.Generator()
+        g.manual_seed(epoch + self.seed)
+
+        self.trainloader = DataLoader(self.trainset, batch_sampler=self.CustomSampler, pin_memory=True,
+                                      num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
+        return self.trainloader
+
+    @staticmethod
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2 ** 32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
