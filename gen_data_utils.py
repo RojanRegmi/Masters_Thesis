@@ -5,6 +5,7 @@ from torch.utils.data import Subset, DataLoader
 import torchvision.transforms.functional as TF
 import numpy as np
 import random
+import time
 
 class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
@@ -198,6 +199,7 @@ class AugmentedTrainDataLoader:
         return self.trainset
 
     def update_trainset(self, epoch):
+        start_time = time.time()
         _ = self.load_augmented_traindata(epoch)
 
         g = torch.Generator()
@@ -205,7 +207,8 @@ class AugmentedTrainDataLoader:
 
         self.trainloader = DataLoader(self.trainset, pin_memory=True,
                                       num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
-        print(f'Dataset and Dataloader Updated Epoch: {epoch}')
+        end_time = (time.time() - start_time) / 60
+        print(f'Dataset and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
         return self.trainloader
 
     @staticmethod
