@@ -203,7 +203,7 @@ class AugmentedTrainDataLoader:
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)
 
-        self.trainloader = DataLoader(self.trainset, batch_sampler=self.CustomSampler, pin_memory=True,
+        self.trainloader = DataLoader(self.trainset, pin_memory=True,
                                       num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
         return self.trainloader
 
