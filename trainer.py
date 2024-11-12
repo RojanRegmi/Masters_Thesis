@@ -360,7 +360,7 @@ if __name__ == '__main__' :
                                                 ])
             target_size = len(baseset)
             #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
-            augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
+            augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, batch_size=args.batch_size, generated_ratio=args.gen_nst_prob)
             trainset = augmented_trainset.load_augmented_traindata(epoch=0)
             print('Mixed Dataset Loaded')
         else:
@@ -386,7 +386,7 @@ if __name__ == '__main__' :
             target_size = len(baseset)
             print(f'Target Size: {target_size}')
             #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
-            augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
+            augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, batch_size=args.batch_size, generated_ratio=args.gen_nst_prob)
             trainset = augmented_trainset.load_augmented_traindata(epoch=0)
             print('Mixed Dataset Loaded')
         else:

@@ -122,7 +122,7 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
                                         )
 
 class AugmentedTrainDataLoader:
-    def __init__(self, base_trainset, target_size, dataset, tf, seed=42, transforms_generated=None, generated_ratio=0.5, robust_samples=0, number_workers=4):
+    def __init__(self, base_trainset, target_size, dataset, tf, batch_size, seed=42, transforms_generated=None, generated_ratio=0.5, robust_samples=0, number_workers=4):
         self.base_trainset = base_trainset
         self.target_size = target_size
         self.dataset = dataset
@@ -135,6 +135,7 @@ class AugmentedTrainDataLoader:
         self.generated_dataset = None
         self.trainset = None
         self.trainloader = None
+        self.batch_size = batch_size
 
         # Load generated dataset based on provided ratio and dataset type
         if self.generated_ratio > 0.0:
@@ -207,7 +208,7 @@ class AugmentedTrainDataLoader:
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)
 
-        self.trainloader = DataLoader(self.trainset, pin_memory=True,
+        self.trainloader = DataLoader(self.trainset, pin_memory=True, batch_size= self.batch_size,
                                       num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
         end_time = (time.time() - start_time) / 60
         print(f'Dataset of length {len(self.trainset)} and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
