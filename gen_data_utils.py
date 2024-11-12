@@ -158,11 +158,11 @@ class AugmentedTrainDataLoader:
         np.random.seed(epoch + self.seed)
         random.seed(epoch + self.seed)
 
-        print(len(images))
-
         images = [None] * self.target_size
         labels = [None] * self.target_size
         sources = [None] * self.target_size
+
+        print(len(images))
 
         if self.generated_dataset is None or self.generated_ratio == 0.0:
             images, labels = zip(*self.base_trainset)
