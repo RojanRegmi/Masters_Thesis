@@ -204,7 +204,7 @@ def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, tra
 
             # get the inputs
             inputs, labels = inputs.to(device), labels.to(device)
-            print(len(inputs))
+            #print(len(inputs))
 
             outputs = net(inputs)
             loss = criterion(outputs, labels)
@@ -220,7 +220,7 @@ def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, tra
 
             if i % 100 == 0:
                 logger.info(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
-                print(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
+                #print(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
         
         train_accuracy = 100 * correct_train/total_train
         train_loss = running_loss/len(trainloader)
