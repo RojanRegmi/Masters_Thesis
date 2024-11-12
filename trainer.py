@@ -217,8 +217,9 @@ def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, tra
             total_train += labels.size(0)
             correct_train += (predicted == labels).sum().item()
 
-            if i % 10 == 0:
+            if i % 100 == 0:
                 logger.info(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
+                print(f'Number of Minibatches:{i}, total train: {total_train}, running_loss: {running_loss}')
         
         train_accuracy = 100 * correct_train/total_train
         train_loss = running_loss/len(trainloader)
