@@ -393,10 +393,10 @@ if __name__ == '__main__' :
         net = WideResNet_28_4(num_classes=100)
     
     g = torch.Generator()
-    g.manual_seed(seed=42)
+    g.manual_seed()
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, )
+                                            shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
 
     #testset = torchvision.datasets.CIFAR100(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
