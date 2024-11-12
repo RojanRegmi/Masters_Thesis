@@ -158,6 +158,8 @@ class AugmentedTrainDataLoader:
         np.random.seed(epoch + self.seed)
         random.seed(epoch + self.seed)
 
+        print(len(images))
+
         images = [None] * self.target_size
         labels = [None] * self.target_size
         sources = [None] * self.target_size
@@ -208,7 +210,7 @@ class AugmentedTrainDataLoader:
         self.trainloader = DataLoader(self.trainset, pin_memory=True,
                                       num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
         end_time = (time.time() - start_time) / 60
-        print(f'Dataset and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
+        print(f'Dataset of length {len(self.trainset)} and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
         return self.trainloader
 
     @staticmethod
