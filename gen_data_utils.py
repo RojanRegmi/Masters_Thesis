@@ -197,9 +197,8 @@ class AugmentedTrainDataLoader:
                                          self.transforms_basic, self.transforms_augmentation, transforms_generated=self.transform_generated)
         return self.trainset
 
-    def update_trainset(self, epoch, start_epoch=0):
-        if self.generated_ratio != 0.0 and epoch != 0 and epoch != start_epoch:
-            self.load_augmented_traindata(epoch)
+    def update_trainset(self, epoch):
+        self.load_augmented_traindata(epoch)
 
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)

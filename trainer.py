@@ -319,8 +319,8 @@ if __name__ == '__main__' :
 
     transform_train = transforms.Compose([
         #nst_transfer,
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomCrop(32, padding=4),
+        #transforms.RandomHorizontalFlip(),
+        #transforms.RandomCrop(32, padding=4),
         random_choice_transform,
         #GeometricTrivialAugmentWide(),  
         #transforms.TrivialAugmentWide(),
@@ -358,7 +358,8 @@ if __name__ == '__main__' :
                                                 ])
             target_size = len(baseset)
             #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen)
-            trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
+            augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
+            trainset = augmented_trainset.load_augmented_traindata(epoch=0)
             print('Mixed Dataset Loaded')
         else:
             print('Loading Original CIFAR10')
@@ -383,7 +384,8 @@ if __name__ == '__main__' :
             target_size = len(baseset)
             print(f'Target Size: {target_size}')
             #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
-            trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
+            augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=transform_gen, generated_ratio=args.gen_nst_prob)
+            trainset = augmented_trainset.load_augmented_traindata(epoch=0)
             print('Mixed Dataset Loaded')
         else:
             print('Loading Original CIFAR100')
@@ -411,7 +413,12 @@ if __name__ == '__main__' :
     #net = WideResNet_28_4(num_classes=100)
     net.to(device)
 
-    trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, gen_ratio=args.gen_nst_prob, device=device, trainset=trainset, save_path='./cifar_net.pth')
+    try:
+        augmented_trainset
+    except NameError:
+        augmented_trainset = trainset
+
+    trainer_fn(epochs=args.epochs, net=net, trainloader=trainloader, testloader=testloader, gen_ratio=args.gen_nst_prob, device=device, trainset=augmented_trainset, save_path='./cifar_net.pth')
 
 
     
