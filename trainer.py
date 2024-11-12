@@ -204,6 +204,7 @@ def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, tra
 
             # get the inputs
             inputs, labels = inputs.to(device), labels.to(device)
+            print(len(inputs))
 
             outputs = net(inputs)
             loss = criterion(outputs, labels)
