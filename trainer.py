@@ -393,7 +393,7 @@ if __name__ == '__main__' :
         net = WideResNet_28_4(num_classes=100)
     
     g = torch.Generator()
-    g.manual_seed()
+    g.manual_seed(42)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
