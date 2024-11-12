@@ -198,13 +198,14 @@ class AugmentedTrainDataLoader:
         return self.trainset
 
     def update_trainset(self, epoch):
-        self.load_augmented_traindata(epoch)
+        _ = self.load_augmented_traindata(epoch)
 
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)
 
         self.trainloader = DataLoader(self.trainset, pin_memory=True,
                                       num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
+        print(f'Dataset and Dataloader Updated Epoch: {epoch}')
         return self.trainloader
 
     @staticmethod
