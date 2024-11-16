@@ -44,13 +44,13 @@ encoder_path = os.path.join(current_dir, encoder_rel_path)
 decoder_path = os.path.join(current_dir, decoder_rel_path)
 decoder_path_reduced = os.path.join(current_dir, reduced_decoder_rel_path)
 
-seed = 42
-torch.manual_seed(seed)
-np.random.seed(seed)
-random.seed(seed)
-torch.cuda.manual_seed(seed)
+#seed = 42
+#torch.manual_seed(seed)
+#np.random.seed(seed)
+#random.seed(seed)
+#torch.cuda.manual_seed(seed)
 
-torch.backends.cudnn.deterministic = True
+#torch.backends.cudnn.deterministic = True
 
 class CIFAR10(Dataset):
     def __init__(self, data_dir, train=True, transform=None):
@@ -281,10 +281,21 @@ if __name__ == '__main__' :
     parser.add_argument('--skip', type=bool, default=False, help='MobileNet Skip Layers')
     parser.add_argument('--print_batch', type=bool, default=True, help='print a batch of the transformed input')
     parser.add_argument('--reduced_vgg', type=bool, default=False, help='Use the VGG encoder decoder pair after block 3 or 4')
+    parser.add_argument('--nst_random_comb_prob', type=float, default=0.0, help='probability of NST when used in random combination with TA [TA has probability: 1 - nst_random_comb_prob]')
+    parser.add_argument('--seed', type=int, default=42, help='seed for reproducibility used with torch, numpy and random')
 
 
 
     args = parser.parse_args()
+
+    seed = args.seed
+
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.cuda.manual_seed(seed)
+
+    torch.backends.cudnn.deterministic = True
 
     mp.set_start_method('spawn', force=True) 
 
@@ -297,7 +308,7 @@ if __name__ == '__main__' :
     if args.skip is True:
         style1_feats = load_feat_files(feats_dir=args.style1_dir, device=device)
 
-    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=0.9, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
+    nst_transfer = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.prob_ratio, probability=args.prob_ratio, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max, skip=args.skip)
     nst_transfer_gen = NSTTransform(style_feats, encoder=encoder, decoder=decoder, alpha=args.alpha, probability=1.0, randomize=args.randomize_alpha, rand_min=args.rand_min, rand_max=args.rand_max)
 
     transform1 = nst_transfer
@@ -305,7 +316,7 @@ if __name__ == '__main__' :
 
 
     transforms_list = [transform1, transform2]
-    nst_prob = args.prob_ratio
+    nst_prob = args.nst_random_comb_prob
     ta_prob = 1 - nst_prob
     probabilities = [nst_prob, ta_prob]
     
@@ -319,7 +330,8 @@ if __name__ == '__main__' :
     random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
     random_choice_gen = RandomChoiceTransforms(transforms_list, probabilities_gen)
 
-    transform_train = transforms.Compose([
+    if args.nst_random_comb_prob > 0:
+        transform_train = transforms.Compose([
         #nst_transfer,
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, padding=4),
@@ -329,6 +341,19 @@ if __name__ == '__main__' :
         transforms.ToTensor(),
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
+
+    else:
+        
+        transform_train = transforms.Compose([
+            nst_transfer,
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(32, padding=4),
+            #random_choice_transform,
+            #GeometricTrivialAugmentWide(),  
+            #transforms.TrivialAugmentWide(),
+            transforms.ToTensor(),
+            #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
     
  
     
