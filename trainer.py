@@ -283,6 +283,7 @@ if __name__ == '__main__' :
     parser.add_argument('--reduced_vgg', type=bool, default=False, help='Use the VGG encoder decoder pair after block 3 or 4')
     parser.add_argument('--nst_random_comb_prob', type=float, default=0.0, help='probability of NST when used in random combination with TA [TA has probability: 1 - nst_random_comb_prob]')
     parser.add_argument('--seed', type=int, default=42, help='seed for reproducibility used with torch, numpy and random')
+    parser.add_argument('--transformation_type', type=str, default='nst', help='data augmentation schemes: baseline: horizontal crops and flips, nst: style transfer + baseline, random_combination: baseline + random selection (NST or TA), nst_ta_sequential: baseline + NST +TA')
 
 
 
@@ -330,7 +331,7 @@ if __name__ == '__main__' :
     random_choice_transform = RandomChoiceTransforms(transforms_list, probabilities)
     random_choice_gen = RandomChoiceTransforms(transforms_list, probabilities_gen)
 
-    if args.nst_random_comb_prob > 0:
+    if args.transformation_type == 'random_combination':
         transform_train = transforms.Compose([
         #nst_transfer,
         transforms.RandomHorizontalFlip(),
@@ -342,7 +343,7 @@ if __name__ == '__main__' :
         #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    else:
+    elif args.transformation_type == 'nst':
         
         transform_train = transforms.Compose([
             nst_transfer,
@@ -354,6 +355,32 @@ if __name__ == '__main__' :
             transforms.ToTensor(),
             #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
+    
+    elif args.transformation_type == 'baseline':
+        transform_train = transforms.Compose([
+            #nst_transfer,
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(32, padding=4),
+            #random_choice_transform,
+            #GeometricTrivialAugmentWide(),  
+            #transforms.TrivialAugmentWide(),
+            transforms.ToTensor(),
+            #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+    
+    elif args.transformation_type == 'ta':
+        transform_train = transforms.Compose([
+            #nst_transfer,
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(32, padding=4),
+            #random_choice_transform,
+            #GeometricTrivialAugmentWide(),  
+            #transforms.TrivialAugmentWide(),
+            transforms.ToTensor(),
+            #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        
+        
     
  
     
