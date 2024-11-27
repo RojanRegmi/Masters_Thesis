@@ -11,7 +11,7 @@ class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
 
     def __init__(self, images, labels, sources, transforms_preprocess, transforms_basic, transforms_augmentation,
-                 transforms_generated=None):
+                 transforms_generated):
         self.images = images
         self.labels = labels
         self.sources = sources
@@ -118,7 +118,7 @@ def load_augmented_traindata(base_trainset, target_size, dataset, tf, seed=0, tr
             sources[num_original:target_size] = [False] * num_generated
 
         return AugmentedDataset(images, labels, sources, transforms_preprocess,
-                                         transforms_basic, transforms_augmentation, transforms_generated=transform_generated,
+                                         transforms_basic, transforms_augmentation=transforms_augmentation, transforms_generated=transform_generated,
                                         )
 
 class AugmentedTrainDataLoader:
@@ -198,12 +198,12 @@ class AugmentedTrainDataLoader:
             sources[num_original:self.target_size] = [False] * num_generated
 
         self.trainset = AugmentedDataset(images, labels, sources, self.transforms_preprocess,
-                                         self.transforms_basic, self.transforms_augmentation, transforms_generated=self.transform_generated)
+                                         self.transforms_basic, transforms_augmentation=self.transforms_augmentation, transforms_generated=self.transform_generated)
         return self.trainset
 
     def update_trainset(self, epoch):
         start_time = time.time()
-        _ = self.load_augmented_traindata(epoch)
+        self.trainset = self.load_augmented_traindata(epoch)
 
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)
