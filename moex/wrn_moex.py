@@ -96,7 +96,7 @@ class WideBasic(nn.Module):
             )
 
     def forward(self, x):
-        out = self.dropout(self.conv1(F.relu((x))))
+        out = self.dropout(self.conv1(F.relu((self.bn1(x)))))
         out = self.conv2(F.relu(self.bn2(out)))
         out += self.shortcut(x)
         return out
