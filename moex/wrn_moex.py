@@ -59,10 +59,51 @@ class WideBasic(nn.Module):
         out = self.conv2(F.relu(self.bn2(out)))
         out += self.shortcut(x)
         return out
+    
+# Basic block for Wide ResNet without Batch Normalization
+class WideBasicNoBN(nn.Module):
+    def __init__(self, in_planes, planes, dropout_rate, stride=1):
+        super(WideBasicNoBN, self).__init__()
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, padding=1, bias=True)
+        self.dropout = nn.Dropout(p=dropout_rate)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=True)
+
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_planes != planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=True),
+            )
+
+    def forward(self, x):
+        out = self.dropout(self.conv1(F.relu(x)))
+        out = self.conv2(F.relu(out))
+        out += self.shortcut(x)
+        return out
+    
+class WideBasic(nn.Module):
+    def __init__(self, in_planes, planes, dropout_rate, stride=1):
+        super(WideBasic, self).__init__()
+        self.bn1 = nn.BatchNorm2d(in_planes)
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, padding=1, bias=True)
+        self.dropout = nn.Dropout(p=dropout_rate)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=True)
+
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_planes != planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=True),
+            )
+
+    def forward(self, x):
+        out = self.dropout(self.conv1(F.relu((x))))
+        out = self.conv2(F.relu(self.bn2(out)))
+        out += self.shortcut(x)
+        return out
 
 # Wide ResNet with PoNo and Instance Normalization (IN) for MoEx
 class WideResNetWithPoNoAndIN(nn.Module):
-    def __init__(self, depth, widen_factor, dropout_rate=0.3, num_classes=10, factor=1, block=WideBasic):
+    def __init__(self, depth, widen_factor, dropout_rate=0.3, num_classes=10, factor=1, block=WideBasic, style_block=WideBasicNoBN):
         super(WideResNetWithPoNoAndIN, self).__init__()
         self.in_planes = 16
         assert (depth - 4) % 6 == 0, "Wide-resnet depth should be 6n+4"
@@ -77,6 +118,7 @@ class WideResNetWithPoNoAndIN(nn.Module):
         self.layer1 = self._wide_layer(block, nStages[1], n, dropout_rate, stride=factor)  # First stage
         self.layer2 = self._wide_layer(block, nStages[2], n, dropout_rate, stride=2)  # Second stage
         self.layer3 = self._wide_layer(block, nStages[3], n, dropout_rate, stride=2)  # Third stage
+        self.style_layer1 = self._wide_layer(style_block, nStages[1], n, dropout_rate, stride=factor)
         self.bn1 = nn.BatchNorm2d(nStages[3], momentum=0.9)
         self.linear = nn.Linear(nStages[3], num_classes)
 
@@ -109,22 +151,14 @@ class WideResNetWithPoNoAndIN(nn.Module):
         if image2 is not None and moex_type == 'in':
             # Forward pass for style image (image2)
             out2 = self.conv1(image2)
-            out2 = self.layer1(out2)
+            out2 = self.style_layer1(out2)
             #out2 = self.layer2(out2)
 
             # Apply MoEx (instance normalization on content image with style moments)
             out1 = moex_instance_norm(out1, out2)
-        out1 = self.layer2(out1)
-
-        
-            
-        
+        out1 = self.layer2(out1) 
         
         out1 = self.layer3(out1)
-
-        # Apply Instance Normalization MoEx right after the second stage (layer2)
-        
-
         
         out1 = F.relu(self.bn1(out1))
         out1 = F.avg_pool2d(out1, 8)
