@@ -187,8 +187,15 @@ class AugmentedTrainDataLoader:
         self.t = transforms.ToTensor()
         self.transforms_preprocess = transforms.Compose([self.t])
         self.transforms_basic = transforms.Compose([self.flip, self.c32])
-        self.transforms_augmentation = transforms.Compose([self.transforms_basic, self.tf, self.transforms_preprocess])
-        self.transform_generated = transforms.Compose([self.transforms_basic, self.transforms_generated, self.transforms_preprocess])
+        if self.tf is None:
+            self.transforms_augmentation = transforms.Compose([self.transforms_basic, self.transforms_preprocess])
+        else:
+            self.transforms_augmentation = transforms.Compose([self.transforms_basic, self.tf, self.transforms_preprocess])
+
+        if self.transform_generated is None:
+            self.transform_generated = transforms.Compose([self.transforms_basic, self.transforms_preprocess])
+        else:
+            self.transform_generated = transforms.Compose([self.transforms_basic, self.transforms_generated, self.transforms_preprocess])
 
     def load_augmented_traindata(self, epoch):
 
@@ -241,8 +248,8 @@ class AugmentedTrainDataLoader:
     def update_trainset(self, epoch):
         start_time = time.time()
         self.trainset = self.load_augmented_traindata(epoch)
-        print(type(self.trainset))
-        print(len(self.trainset))
+        print(f'Dataset Type: {type(self.trainset)}')
+        print(f'Dataset length: {len(self.trainset)}')
         CustomSampler = BalancedRatioSampler(self.trainset, generated_ratio=self.generated_ratio, batch_size=self.batch_size)
 
         g = torch.Generator()
