@@ -1,11 +1,47 @@
 import torch
 from torchvision import transforms
 from PIL import Image
-from torch.utils.data import Subset, DataLoader
+from torch.utils.data import Subset, DataLoader, Sampler
 import torchvision.transforms.functional as TF
 import numpy as np
 import random
 import time
+
+class BalancedRatioSampler(Sampler):
+    def __init__(self, dataset, generated_ratio, batch_size):
+        super(BalancedRatioSampler, self).__init__()
+        self.dataset = dataset
+        self.batch_size = batch_size
+        self.generated_ratio = generated_ratio
+        self.size = len(dataset)
+
+        self.num_generated = int(self.size * self.generated_ratio)
+        self.num_original = self.size - self.num_generated
+        self.num_generated_batch = int(self.batch_size * self.generated_ratio)
+        self.num_original_batch = self.batch_size - self.num_generated_batch
+
+    def __iter__(self):
+
+        # Create a single permutation for the whole epoch.
+        # generated permutation requires generated images appended to the back of the dataset!
+        original_perm = torch.randperm(self.num_original)
+        generated_perm = torch.randperm(self.num_generated) + self.num_original
+
+        batch_starts = range(0, self.size, self.batch_size)  # Start points for each batch
+        for i, start in enumerate(batch_starts):
+
+            # Slicing the permutation to get batch indices, avoiding going out of bound
+            original_indices = original_perm[min(i * self.num_original_batch, self.num_original) : min((i+1) * self.num_original_batch, self.num_original)]
+            generated_indices = generated_perm[min(i * self.num_generated_batch, self.num_generated) : min((i+1) * self.num_generated_batch, self.num_generated)]
+
+            # Combine
+            batch_indices = torch.cat((original_indices, generated_indices))
+            #batch_indices = batch_indices[torch.randperm(batch_indices.size(0))]
+
+            yield batch_indices.tolist()
+
+    def __len__(self):
+        return (self.size + self.batch_size - 1) // self.batch_size
 
 class AugmentedDataset(torch.utils.data.Dataset):
     """Dataset wrapper to perform augmentations on Generated Data"""
@@ -136,6 +172,7 @@ class AugmentedTrainDataLoader:
         self.trainset = None
         self.trainloader = None
         self.batch_size = batch_size
+        self.CustomSampler = BalancedRatioSampler(self.trainset, generated_ratio=self.generated_ratio, batch_size=self.batch_size)
 
         # Load generated dataset based on provided ratio and dataset type
         if self.generated_ratio > 0.0:
@@ -209,7 +246,7 @@ class AugmentedTrainDataLoader:
         g.manual_seed(epoch + self.seed)
 
         self.trainloader = DataLoader(self.trainset, pin_memory=True, batch_size= self.batch_size,
-                                      num_workers=self.number_workers, worker_init_fn=self.seed_worker, generator=g)
+                                      num_workers=self.number_workers, batch_sampler=self.CustomSampler, worker_init_fn=self.seed_worker, generator=g)
         end_time = (time.time() - start_time) / 60
         print(f'Dataset of length {len(self.trainset)} and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
         return self.trainloader
