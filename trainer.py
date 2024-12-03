@@ -151,11 +151,11 @@ def load_feat_files(feats_dir, device):
     style_feats_tensor = style_feats_tensor.to(device)
     return style_feats_tensor
 
-def imshow(img):
+def imshow(img, filename='train_dataloader.png'):
     npimg = img.numpy()
     plt.figure(figsize=(20, 25))  # Adjust the width and height as needed
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.savefig('train_dataloader.png')
+    plt.savefig(filename)
 
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
@@ -472,7 +472,7 @@ if __name__ == '__main__' :
         img_grid = torchvision.utils.make_grid(images)
         temp_grid = torchvision.utils.make_grid(temp_imgs)
         imshow(img_grid)
-        imshow(temp_grid)
+        imshow(temp_grid, filename='nst_ta_dataloader.png')
 
     #net = WideResNet_28_4(num_classes=100)
     net.to(device)
