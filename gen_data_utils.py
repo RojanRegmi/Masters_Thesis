@@ -172,7 +172,7 @@ class AugmentedTrainDataLoader:
         self.trainset = None
         self.trainloader = None
         self.batch_size = batch_size
-        self.CustomSampler = BalancedRatioSampler(self.trainset, generated_ratio=self.generated_ratio, batch_size=self.batch_size)
+        #self.CustomSampler = BalancedRatioSampler(self.trainset, generated_ratio=self.generated_ratio, batch_size=self.batch_size)
 
         # Load generated dataset based on provided ratio and dataset type
         if self.generated_ratio > 0.0:
@@ -241,6 +241,8 @@ class AugmentedTrainDataLoader:
     def update_trainset(self, epoch):
         start_time = time.time()
         self.trainset = self.load_augmented_traindata(epoch)
+        print(type(self.trainset))
+        print(len(self.trainset))
         CustomSampler = BalancedRatioSampler(self.trainset, generated_ratio=self.generated_ratio, batch_size=self.batch_size)
 
         g = torch.Generator()
