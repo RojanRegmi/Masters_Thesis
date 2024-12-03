@@ -192,7 +192,7 @@ class AugmentedTrainDataLoader:
         else:
             self.transforms_augmentation = transforms.Compose([self.transforms_basic, self.tf, self.transforms_preprocess])
 
-        if self.transform_generated is None:
+        if self.transforms_generated is None:
             self.transform_generated = transforms.Compose([self.transforms_basic, self.transforms_preprocess])
         else:
             self.transform_generated = transforms.Compose([self.transforms_basic, self.transforms_generated, self.transforms_preprocess])
