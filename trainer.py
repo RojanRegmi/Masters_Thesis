@@ -439,7 +439,9 @@ if __name__ == '__main__' :
             print(f'Target Size: {target_size}')
             #trainset = load_augmented_traindata(base_trainset=baseset, dataset=args.dataset, tf=transform_train, target_size=target_size, transforms_generated=transform_gen)
             augmented_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=random_choice_transform, target_size=target_size, transforms_generated=random_choice_gen, batch_size=args.batch_size, generated_ratio=args.gen_nst_prob)
+            test_trainset = AugmentedTrainDataLoader(base_trainset=baseset, dataset=args.dataset, tf=None, target_size=target_size, transforms_generated=None, batch_size=args.batch_size, generated_ratio=args.gen_nst_prob)
             trainset = augmented_trainset.load_augmented_traindata(epoch=0)
+            temp_trainset = test_trainset.load_augmented_traindata(epoch=0)
             print('Mixed Dataset Loaded')
         else:
             print('Loading Original CIFAR100')
@@ -451,7 +453,11 @@ if __name__ == '__main__' :
     g = torch.Generator()
     g.manual_seed(42)
 
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
+    #trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
+                                           # shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
+    trainloader = torch.utils.data.DataLoader(temp_trainset, batch_size=batch_size,
+                                            shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
+    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                             shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
 
     #testset = torchvision.datasets.CIFAR100(data_dir=cifar_10_dir, train=False, transform=transform_test)
@@ -461,8 +467,12 @@ if __name__ == '__main__' :
     if args.print_batch:
         dataiter = iter(trainloader)
         images, labels = next(dataiter)
+        tempiter = iter(temp_trainloader)
+        temp_imgs, _ = next(tempiter)
         img_grid = torchvision.utils.make_grid(images)
+        temp_grid = torchvision.utils.make_grid(temp_imgs)
         imshow(img_grid)
+        imshow(temp_grid)
 
     #net = WideResNet_28_4(num_classes=100)
     net.to(device)
