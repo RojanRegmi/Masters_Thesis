@@ -193,7 +193,7 @@ def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, tra
         net.train()
 
         if gen_ratio > 0 and epoch != 0:
-            trainloader = trainset.update_trainset(epoch=epoch)
+            trainloader = temp_trainset.update_trainset(epoch=epoch)
 
 
         for i, (inputs, labels) in enumerate(trainloader):
@@ -456,9 +456,9 @@ if __name__ == '__main__' :
     #trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                            # shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
     trainloader = torch.utils.data.DataLoader(temp_trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
+                                            shuffle=False, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
     temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
+                                            shuffle=False, pin_memory=True, num_workers=4, worker_init_fn=seed_worker, generator=g)
 
     #testset = torchvision.datasets.CIFAR100(data_dir=cifar_10_dir, train=False, transform=transform_test)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
