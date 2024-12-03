@@ -255,7 +255,7 @@ class AugmentedTrainDataLoader:
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)
 
-        self.trainloader = DataLoader(self.trainset, pin_memory=True, batch_size= self.batch_size,
+        self.trainloader = DataLoader(self.trainset, pin_memory=True,
                                       num_workers=self.number_workers, batch_sampler=CustomSampler, worker_init_fn=self.seed_worker, generator=g)
         end_time = (time.time() - start_time) / 60
         print(f'Dataset of length {len(self.trainset)} and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
