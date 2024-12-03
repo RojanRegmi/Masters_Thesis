@@ -241,12 +241,13 @@ class AugmentedTrainDataLoader:
     def update_trainset(self, epoch):
         start_time = time.time()
         self.trainset = self.load_augmented_traindata(epoch)
+        CustomSampler = BalancedRatioSampler(self.trainset, generated_ratio=self.generated_ratio, batch_size=self.batch_size)
 
         g = torch.Generator()
         g.manual_seed(epoch + self.seed)
 
         self.trainloader = DataLoader(self.trainset, pin_memory=True, batch_size= self.batch_size,
-                                      num_workers=self.number_workers, batch_sampler=self.CustomSampler, worker_init_fn=self.seed_worker, generator=g)
+                                      num_workers=self.number_workers, batch_sampler=CustomSampler, worker_init_fn=self.seed_worker, generator=g)
         end_time = (time.time() - start_time) / 60
         print(f'Dataset of length {len(self.trainset)} and Dataloader Updated Epoch: {epoch} with time {end_time:.4f} Mins')
         return self.trainloader
