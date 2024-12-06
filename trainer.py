@@ -193,7 +193,7 @@ def trainer_fn(epochs: int, net, gen_ratio, trainloader, testloader, device, tra
         net.train()
 
         if gen_ratio > 0 and epoch != 0:
-            trainloader = test_trainset.update_trainset(epoch=epoch)
+            trainloader = trainset.update_trainset(epoch=epoch)
 
 
         for i, (inputs, labels) in enumerate(trainloader):
